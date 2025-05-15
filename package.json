@@ -20,7 +20,10 @@
   "homepage": "https://github.com/01prakash-aditya/online-judge#readme",
   "description": "",
   "dependencies": {
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.14.3",
     "nodemon": "^3.1.10"
   }
 }
