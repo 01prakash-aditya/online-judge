@@ -1,8 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Header from "../src/components/Header";
 
 export default function App() {
   return (
     <BrowserRouter>
+    {/* header */}  
+    <Header/>
       <Routes>
         <Route path="/" element={<h1>Home</h1>} />
         <Route path="/about" element={<h1>About</h1>} />
