@@ -1,0 +1,26 @@
+{
+  "name": "online-judge",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon api/index.js",
+    "start": "node api/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/01prakash-aditya/online-judge.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/01prakash-aditya/online-judge/issues"
+  },
+  "homepage": "https://github.com/01prakash-aditya/online-judge#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
+  }
+}
