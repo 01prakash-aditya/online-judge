@@ -4,7 +4,7 @@
 
 ---
 
-## 🚩 Overview
+## Overview
 
 **AlgoU** enables:
 
@@ -16,7 +16,7 @@
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: React.js
 - **Backend**: Node.js + Express.js
@@ -25,7 +25,7 @@
 
 ---
 
-## 🔄 System Workflow
+## System Workflow
 
 1. **User submits code** through the platform.
 2. **Submission is queued** using a message broker (e.g., Redis).
@@ -35,7 +35,7 @@
 
 ---
 
-## 🔐 Security Measures
+## Security Measures
 
 - **Docker sandboxing** for safe and isolated execution
 - **JWT Authentication**
@@ -44,7 +44,7 @@
 
 ---
 
-## 📈 Future Enhancements
+## Future Enhancements
 
 - **Plagiarism Detection** (e.g., MOSS integration)
 - **Real-Time Leaderboard** using WebSockets
