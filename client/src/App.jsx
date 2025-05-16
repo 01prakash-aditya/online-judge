@@ -1,5 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "../src/components/Header";
+import SignUp from "./pages/SignUp";
+import SignIn from "./pages/SignIn";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Profile from "./pages/Profile";
+// import PrivateRute from "./components/PrivateRute";
 
 export default function App() {
   return (
@@ -7,11 +13,15 @@ export default function App() {
     {/* header */}  
     <Header/>
       <Routes>
-        <Route path="/" element={<h1>Home</h1>} />
-        <Route path="/about" element={<h1>About</h1>} />
-        <Route path="/sign-in" element={<h1>SignIn</h1>} />
-        <Route path="/sign-up" element={<h1>SignUp</h1>} />
-        <Route path="/profile" element={<h1>Profile</h1>} />
+        <Route path="/" element={<Home/>} />
+        <Route path="/about" element={<About/>} />
+        <Route path="/sign-in" element={<SignIn/>} />
+        <Route path="/sign-up" element={<SignUp/>} />
+      {/* <Route element = {<PrivateRute/>}>
+        <Route path="/profile" element={<Profile/>} />
+        </Route>
+       */}
+        <Route path="/profile" element={<Profile/>} />
       </Routes>
     </BrowserRouter>
   );
