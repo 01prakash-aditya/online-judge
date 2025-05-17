@@ -9,7 +9,6 @@ export default defineConfig({
     tailwindcss(),
   ],
   optimizeDeps: {
-    include: ['react-redux'],
     include: ['@reduxjs/toolkit'],
   },
     server:{

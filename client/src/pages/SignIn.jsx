@@ -63,7 +63,7 @@ export default function SignIn() {
         </label>
         <input
           type="password"
-          placeholder="Create a secure password"
+          placeholder="Enter your password here"
           id="password"
           className="bg-slate-100 p-3 rounded-lg"
           onChange={handleChange}
