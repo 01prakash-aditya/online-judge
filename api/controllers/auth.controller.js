@@ -1,25 +1,21 @@
-import User from "../models/user.model.js";
-import bcryptjs from "bcryptjs";
-import { errorHandler } from "../utils/error.js";
-import jwt from "jsonwebtoken";
+import User from '../models/user.model.js';
+import bcryptjs from 'bcryptjs';
+import { errorHandler } from '../utils/error.js';
+import jwt from 'jsonwebtoken';
 
 export const signup = async (req, res, next) => {
+  const { username, email, password, fullName, dob } = req.body;
+  const hashedPassword = bcryptjs.hashSync(password, 10);
+  const newUser = new User({ 
+    username, 
+    email, 
+    password: hashedPassword,
+    fullName,
+    dob
+  });
   try {
-    const { username, email, password, fullName, dob } = req.body;
-    const hashedPassword = bcryptjs.hashSync(password, 10);
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-      fullName,
-      dob: new Date(dob),
-    });
-
     await newUser.save();
-
-    res.status(201).json({
-      message: "User created successfully",
-    });
+    res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
     next(error);
   }
@@ -39,6 +35,56 @@ export const signin = async (req, res, next) => {
       .cookie('access_token', token, { httpOnly: true, expires: expiryDate })
       .status(200)
       .json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const google = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (user) {
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      const { password: hashedPassword, ...rest } = user._doc;
+      const expiryDate = new Date(Date.now() + 3600000); // 1 hour
+      res
+        .cookie('access_token', token, {
+          httpOnly: true,
+          expires: expiryDate,
+        })
+        .status(200)
+        .json(rest);
+    } else {
+      const generatedPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+      const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+      
+      const username = req.body.username || 
+        req.body.email.split('@')[0].toLowerCase() +
+        Math.random().toString(36).slice(-8);
+      
+      const newUser = new User({
+        username: username,
+        email: req.body.email,
+        password: hashedPassword,
+        fullName: req.body.fullName || 'Google User',
+        dob: req.body.dob || new Date(),
+        profilePicture: req.body.profilePicture || req.body.photo,
+      });
+      
+      await newUser.save();
+      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      const { password: hashedPassword2, ...rest } = newUser._doc;
+      const expiryDate = new Date(Date.now() + 3600000); // 1 hour
+      res
+        .cookie('access_token', token, {
+          httpOnly: true,
+          expires: expiryDate,
+        })
+        .status(200)
+        .json(rest);
+    }
   } catch (error) {
     next(error);
   }

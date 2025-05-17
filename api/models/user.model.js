@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default: ''
+    default: 'https://www.pngmart.com/files/23/Profile-PNG-Photo.png',
   },
   bio: {
     type: String,
