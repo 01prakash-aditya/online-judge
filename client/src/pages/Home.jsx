@@ -37,7 +37,7 @@ export default function Home() {
             <span className='text-green-600 mr-2'>✓</span>Online Compiler
           </h3>
           <p className='text-slate-700'>
-            Write, compile, and execute code in 20+ programming languages directly in your browser.
+            Write, compile, and execute code in c++ programming language directly in your browser.
             Our compiler provides real-time feedback and execution status for your submissions.
           </p>
         </div>

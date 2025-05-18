@@ -34,7 +34,7 @@ export default function About() {
           </h3>
           <p className='text-slate-700'>
             Built on the MERN stack (MongoDB, Express, React, Node.js) with secure JWT authentication.
-            Our compiler infrastructure supports 20+ programming languages with sandbox execution for 
+            Our compiler infrastructure supports c++ programming language with sandbox execution for 
             safety and reliability.
           </p>
         </div>
@@ -47,6 +47,17 @@ export default function About() {
             Aimed to build the most comprehensive and user-friendly online judge platform, helping 
             programmers of all skill levels improve their algorithmic thinking and coding efficiency
             through practice and competition.
+          </p>
+        </div>
+        
+        <div className='bg-white p-5 rounded-lg shadow'>
+          <h3 className='text-xl font-semibold mb-3 text-slate-800'>
+            <span className='text-purple-600 mr-2'>👥</span>Community
+          </h3>
+          <p className='text-slate-700'>
+            Join a thriving community of developers who share solutions, discuss algorithms, and 
+            participate in regular coding contests. Learn from peers and build your professional
+            network while improving your programming skills.
           </p>
         </div>
       </div>
