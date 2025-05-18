@@ -54,7 +54,7 @@ export default function SignUp() {
           type="text"
           placeholder="eg. aditya07"
           id="username"
-          className="bg-slate-100 p-3 rounded-lg"
+          className="bg-slate-100 p-3 rounded-lg "
           onChange={handleChange}
         />
         <label htmlFor="email" className="text-sm text-gray-500">
@@ -94,7 +94,7 @@ export default function SignUp() {
           type="date"
           placeholder="Date Of Birth"
           id="dob"
-          className="bg-slate-100 text-gray-500 p-3 rounded-lg"
+          className="bg-slate-100 p-3 rounded-lg"
           onChange={handleChange}
         />
         <button disabled={loading} className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-75 disabled:opacity-55 ">
