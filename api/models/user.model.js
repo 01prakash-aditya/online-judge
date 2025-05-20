@@ -48,10 +48,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  participatedContests: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Contest'
-  }]
+  questionCount: {
+    type: Number,
+    default: 0
+  }
 });
 
 const User = mongoose.model('User', userSchema);

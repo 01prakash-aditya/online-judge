@@ -95,7 +95,7 @@ export default function Profile() {
           <div className="flex flex-col items-center p-3 bg-white rounded-lg shadow-sm">
             <span className="text-sm text-gray-500">Contests Participated</span>
             <span className="text-2xl font-bold text-green-600">
-              {currentUser.participatedContests ? currentUser.participatedContests.length : 0}
+              {currentUser.questionCount || 0}
             </span>
           </div>
         </div>
