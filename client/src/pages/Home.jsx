@@ -25,7 +25,7 @@ export default function Home() {
           <button onClick={() => navigate('/compiler')} className='bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mr-4'>
             {currentUser ? 'Start Coding' : 'Try Now'}
           </button>
-          <button className='bg-slate-600 text-white px-6 py-2 rounded-lg hover:bg-slate-700'>
+          <button onClick={() => navigate('/problemset')} className='bg-slate-600 text-white px-6 py-2 rounded-lg hover:bg-slate-700'>
             Browse Problems
           </button>
         </div>

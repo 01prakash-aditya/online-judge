@@ -135,7 +135,7 @@ export default function Compiler() {
             }
           } else {
             result = 'Program output would appear here based on your input and code.\nThis is a frontend mockup.';
-            status = 'Info: This is a mockup. In the real application, your code would be compiled and executed.';
+            status = 'Info: Mockup output. This is a frontend simulation.';
           }
         } else {
           result = 'Hello, AlgoU!';
