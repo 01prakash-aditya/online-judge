@@ -18,7 +18,7 @@
     "url": "https://github.com/01prakash-aditya/online-judge/issues"
   },
   "homepage": "https://github.com/01prakash-aditya/online-judge#readme",
-  "description": "",
+  "description": "**AlgoU** is an **Online Judge platform** built with the **MERN stack** (MongoDB, Express.js, React.js, Node.js). It supports coding contests with automatic code evaluation, problem management, and leaderboard functionality.",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
