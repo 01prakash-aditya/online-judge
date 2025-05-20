@@ -12,22 +12,39 @@ export default function Header() {
           <h1 className="font-bold text-lg">AlgoU Online Judge</h1>
         </Link>
         <ul className="flex gap-4">
-          <Link to="/">
-            <li>Home</li>
-          </Link>
-          <Link to="/compiler">
-            <li>Compiler</li>
-          </Link>
-          <Link to="/about">
-            <li>About</li>
-          </Link>
-          <Link to="/profile">
-            {currentUser ? (
-              <img src={currentUser.profilePicture || 'https://tableconvert.com/images/avatar.png'} alt="Profile" className="h-7 w-7 rounded-full object-cover" />
-              ):(
-                <li>Sign In</li>
+          <li>
+            <Link className="hover:text-blue-500" to="/">
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link className="hover:text-blue-500" to="/compiler">
+              Compiler
+            </Link>
+          </li>
+          <li>
+            <Link className="hover:text-blue-500" to="/problemset">
+              ProblemSet
+            </Link>
+          </li>
+          <li>
+            <Link className="hover:text-blue-500" to="/about">
+              About
+            </Link>
+          </li>
+          <li>
+            <Link className="hover:text-blue-500 flex items-center" to="/profile">
+              {currentUser ? (
+                <img
+                  src={currentUser.profilePicture || 'https://tableconvert.com/images/avatar.png'}
+                  alt="Profile"
+                  className="h-7 w-7 rounded-full object-cover"
+                />
+              ) : (
+                "Sign In"
               )}
-          </Link>
+            </Link>
+          </li>
         </ul>
       </div>
     </div>

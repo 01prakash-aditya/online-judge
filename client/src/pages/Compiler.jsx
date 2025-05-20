@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 export default function Compiler() {
@@ -13,7 +14,11 @@ export default function Compiler() {
   const [statusMessage, setStatusMessage] = useState('');
   const [executionTime, setExecutionTime] = useState(null);
   const [memoryUsage, setMemoryUsage] = useState(null);
+  const [selectedProblem, setSelectedProblem] = useState(null);
+  const [testCaseIndex, setTestCaseIndex] = useState(0);
+  const location = useLocation();
 
+  // Default sample problems
   const sampleProblems = [
     {
       id: 1,
@@ -34,7 +39,24 @@ export default function Compiler() {
     }
   ];
 
-  const [selectedProblem, setSelectedProblem] = useState(null);
+  useEffect(() => {
+    const storedProblem = localStorage.getItem('selectedProblem');
+    if (storedProblem) {
+      try {
+        const problem = JSON.parse(storedProblem);
+        setSelectedProblem(problem);
+        setCode(problem.defaultCode);
+        if (problem.testCases && problem.testCases.length > 0) {
+          setInput(problem.testCases[0].input);
+        }
+        setOutput('');
+        setStatusMessage('');
+        localStorage.removeItem('selectedProblem');
+      } catch (error) {
+        console.error("Error parsing problem from localStorage:", error);
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -54,7 +76,10 @@ export default function Compiler() {
   const loadProblem = (problem) => {
     setSelectedProblem(problem);
     setCode(problem.defaultCode);
-    setInput('');
+    if (problem.testCases && problem.testCases.length > 0) {
+      setInput(problem.testCases[0].input);
+      setTestCaseIndex(0);
+    }
     setOutput('');
     setStatusMessage('');
   };
@@ -80,7 +105,7 @@ export default function Compiler() {
     setOutput('');
 
     try {
-      // backend
+      // Simulate backend processing
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       let result = '';
@@ -89,12 +114,36 @@ export default function Compiler() {
       let memory = 0;
       
       if (language === 'cpp') {
-        result = selectedProblem 
-          ? 'Program output would appear here based on your input and code.\nThis is a frontend mockup.'
-          : 'Hello, AlgoU!';
-        status = 'Success: Program executed successfully';
+        if (selectedProblem && selectedProblem.testCases && selectedProblem.testCases[testCaseIndex]) {
+          const expectedOutput = selectedProblem.testCases[testCaseIndex].expectedOutput;
+          
+          if (selectedProblem.id === 1) {
+            result = "Hello World";
+            status = result === expectedOutput ? 
+              'Success: Correct output! Test case passed.' : 
+              'Error: Incorrect output. Expected: ' + expectedOutput;
+          } else if (selectedProblem.id === 2) {
+            const nums = input.split(' ').map(Number);
+            if (nums.length >= 2) {
+              result = String(nums[0] + nums[1]);
+              status = result === expectedOutput ? 
+                'Success: Correct output! Test case passed.' : 
+                'Error: Incorrect output. Expected: ' + expectedOutput;
+            } else {
+              result = "Error: Invalid input format";
+              status = 'Error: Invalid input format';
+            }
+          } else {
+            result = 'Program output would appear here based on your input and code.\nThis is a frontend mockup.';
+            status = 'Info: This is a mockup. In the real application, your code would be compiled and executed.';
+          }
+        } else {
+          result = 'Hello, AlgoU!';
+          status = 'Success: Program executed successfully';
+        }
+        
         time = Math.random() * 0.1;
-        memory = Math.round(Math.random() * 500) + 500; // 500-1000 KB
+        memory = Math.round(Math.random() * 500) + 500;
       }
       
       setOutput(result);
@@ -119,6 +168,69 @@ export default function Compiler() {
       setStatusMessage('Solution saved successfully!');
       setTimeout(() => setStatusMessage(''), 3000);
     }, 500);
+  };
+
+  const handleTestCaseChange = (index) => {
+    if (selectedProblem && selectedProblem.testCases && selectedProblem.testCases[index]) {
+      setTestCaseIndex(index);
+      setInput(selectedProblem.testCases[index].input);
+      setOutput('');
+    }
+  };
+
+  const runAllTestCases = async () => {
+    if (!selectedProblem || !selectedProblem.testCases || selectedProblem.testCases.length === 0) {
+      return;
+    }
+
+    setIsCompiling(true);
+    setStatusMessage('Running all test cases...');
+    setOutput('');
+
+    let results = [];
+    let allPassed = true;
+
+    for (let i = 0; i < selectedProblem.testCases.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const testCase = selectedProblem.testCases[i];
+      let passed = false;
+      let output = '';
+
+      if (selectedProblem.id === 1) {
+        output = "Hello World";
+        passed = output === testCase.expectedOutput;
+      } else if (selectedProblem.id === 2) {
+        const nums = testCase.input.split(' ').map(Number);
+        if (nums.length >= 2) {
+          output = String(nums[0] + nums[1]);
+          passed = output === testCase.expectedOutput;
+        }
+      } else {
+        passed = Math.random() > 0.3;
+        output = passed ? testCase.expectedOutput : "Some incorrect output";
+      }
+
+      results.push({ testCase, output, passed });
+      if (!passed) allPassed = false;
+    }
+
+    setIsCompiling(false);
+    
+    const resultsOutput = results.map((result, idx) => {
+      return `Test Case ${idx + 1}: ${result.passed ? 'PASSED ✓' : 'FAILED ✗'}\n` +
+             `Input: ${result.testCase.input || '(empty)'}\n` +
+             `Expected: ${result.testCase.expectedOutput}\n` + 
+             `Got: ${result.output}\n${'-'.repeat(40)}`;
+    }).join('\n');
+    
+    setOutput(`${resultsOutput}\n\nSummary: ${results.filter(r => r.passed).length}/${results.length} test cases passed.`);
+    setStatusMessage(allPassed ? 'Success: All test cases passed!' : 'Warning: Some test cases failed');
+  };
+
+  const getProblemById = (id) => {
+    const idNumber = parseInt(id);
+    return [...sampleProblems, ...(selectedProblem ? [selectedProblem] : [])].find(p => p.id === idNumber) || null;
   };
 
   return (
@@ -172,7 +284,7 @@ export default function Compiler() {
           </div>
           
           <div>
-            <label htmlFor="problem" className="block text-sm font-medium text-gray-700 mb-1">Sample Problems</label>
+            <label htmlFor="problem" className="block text-sm font-medium text-gray-700 mb-1">Problem</label>
             <select
               id="problem"
               onChange={(e) => {
@@ -180,18 +292,22 @@ export default function Compiler() {
                 if (id === 0) {
                   setSelectedProblem(null);
                   setCode('#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, AlgoU!" << endl;\n    return 0;\n}');
+                  setInput('');
                 } else {
-                  const problem = sampleProblems.find(p => p.id === id);
+                  const problem = getProblemById(id);
                   if (problem) loadProblem(problem);
                 }
               }}
+              value={selectedProblem ? selectedProblem.id : "0"}
               className="bg-white border border-gray-300 rounded-md p-2 w-full md:w-60"
-              defaultValue="0"
             >
               <option value="0">Free Coding (No Problem)</option>
               {sampleProblems.map(problem => (
                 <option key={problem.id} value={problem.id}>{problem.title}</option>
               ))}
+              {selectedProblem && !sampleProblems.some(p => p.id === selectedProblem.id) && (
+                <option value={selectedProblem.id}>{selectedProblem.title}</option>
+              )}
             </select>
           </div>
         </div>
@@ -200,25 +316,72 @@ export default function Compiler() {
       {/* Problem description (if any) */}
       {selectedProblem && (
         <div className="bg-white rounded-lg p-4 shadow-md mb-6">
-          <h2 className="text-xl font-semibold mb-2">{selectedProblem.title}</h2>
-          <p className="text-gray-700 mb-4">{selectedProblem.description}</p>
-          <div className="bg-slate-50 p-3 rounded-md">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Test Cases:</h3>
-            <div className="grid gap-4">
-              {selectedProblem.testCases.map((testCase, index) => (
-                <div key={index} className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-600">Input:</p>
-                    <pre className="bg-gray-100 p-2 rounded text-sm">{testCase.input || '(Empty)'}</pre>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-600">Expected Output:</p>
-                    <pre className="bg-gray-100 p-2 rounded text-sm">{testCase.expectedOutput}</pre>
-                  </div>
-                </div>
-              ))}
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-xl font-semibold mb-2">{selectedProblem.title}</h2>
+              <div className="flex items-center gap-2 mb-4">
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  selectedProblem.rating <= 50 ? 'bg-green-100 text-green-800' :
+                  selectedProblem.rating <= 100 ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {selectedProblem.rating <= 50 ? 'Easy' :
+                   selectedProblem.rating <= 100 ? 'Moderate' : 'Difficult'} ({selectedProblem.rating})
+                </span>
+                {selectedProblem.tags && selectedProblem.tags.map((tag, index) => (
+                  <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
+            {selectedProblem.testCases && selectedProblem.testCases.length > 1 && (
+              <button 
+                onClick={runAllTestCases}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              >
+                Run All Test Cases
+              </button>
+            )}
           </div>
+          
+          <p className="text-gray-700 mb-4">{selectedProblem.description}</p>
+          
+          {selectedProblem.testCases && selectedProblem.testCases.length > 0 && (
+            <div className="bg-slate-50 p-3 rounded-md">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-sm font-medium text-gray-700">Test Cases:</h3>
+                {selectedProblem.testCases.length > 1 && (
+                  <div className="flex gap-1">
+                    {selectedProblem.testCases.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleTestCaseChange(index)}
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          testCaseIndex === index 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-600">Input:</p>
+                  <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">{selectedProblem.testCases[testCaseIndex].input || '(Empty)'}</pre>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">Expected Output:</p>
+                  <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">{selectedProblem.testCases[testCaseIndex].expectedOutput}</pre>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
       
