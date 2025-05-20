@@ -5,6 +5,7 @@ import SignIn from "./pages/SignIn";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
+import Compiler from "./pages/Compiler";
 import PrivateRoute from "./components/PrivateRoute";
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/about" element={<About/>} />
         <Route path="/sign-in" element={<SignIn/>} />
         <Route path="/sign-up" element={<SignUp/>} />
+        <Route path="/compiler" element={<Compiler/>} />
         <Route element = {<PrivateRoute/>}>
         <Route path="/profile" element={<Profile/>} />
         </Route>

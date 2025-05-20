@@ -22,7 +22,7 @@ export default function Home() {
           programming skills through competition and learning.
         </p>
         <div className='flex justify-center'>
-          <button className='bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mr-4'>
+          <button onClick={() => navigate('/compiler')} className='bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mr-4'>
             {currentUser ? 'Start Coding' : 'Try Now'}
           </button>
           <button className='bg-slate-600 text-white px-6 py-2 rounded-lg hover:bg-slate-700'>
