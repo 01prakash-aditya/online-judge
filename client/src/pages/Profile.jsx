@@ -93,7 +93,7 @@ export default function Profile() {
             <span className="text-2xl font-bold text-blue-600">{currentUser.rating || 0}</span>
           </div>
           <div className="flex flex-col items-center p-3 bg-white rounded-lg shadow-sm">
-            <span className="text-sm text-gray-500">Contests Participated</span>
+            <span className="text-sm text-gray-500">Problems Solved</span>
             <span className="text-2xl font-bold text-green-600">
               {currentUser.questionCount || 0}
             </span>
