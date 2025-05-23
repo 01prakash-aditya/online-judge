@@ -33,6 +33,11 @@ export default function Header() {
             </Link>
           </li>
           <li>
+            <Link className="hover:text-blue-500" to="/contribute">
+              Contribute
+            </Link>
+          </li>
+          <li>
             <Link className="hover:text-blue-500 flex items-center" to="/profile">
               {currentUser ? (
                 <img

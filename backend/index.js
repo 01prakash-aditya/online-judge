@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.post('/run', async (req, res) => {
-    const {language='cpp', code} = req.body;
+    const {language='cpp', code } = req.body;
     
     if (code === undefined || !code) {
         return res.status(400).json({

@@ -12,25 +12,25 @@ if (!existsSync(outputPath)) {
   mkdirSync(outputPath, { recursive: true });
 }
 
-//    \\Users\\0adit\\online-compiler-cpp\\backend\\codes\\cf9d080c-59b0-49cc-81c6-963e153a664d.cpp
-
 export function executeCpp(filePath) {
-    const jobId =path.basename(filePath).split('.')[0];
-    const outfileName = `${jobId}.exe`; 
-    const outputFilePath = join(outputPath, outfileName);
-    return new Promise((resolve, reject) => {
-      exec(`g++ ${filePath} -o ${outputFilePath} && cd ${outputPath} && .\\${outfileName}`, (error, stdout, stderr) => {
-        if (error) {
-          return reject(error);
+  const jobId = path.basename(filePath).split('.')[0];
+  const outfileName = `${jobId}.exe`;
+  const outputFilePath = join(outputPath, outfileName);
+  
+  return new Promise((resolve, reject) => {
+    const command = `g++ ${filePath} -o ${outputFilePath} && ${outputFilePath}`;
+    
+    exec(command, { timeout: 5000 }, (error, stdout, stderr) => {
+      if (error) {
+        if (error.code === 'TIMEOUT') {
+          return reject(new Error('Execution timeout (5 seconds exceeded)'));
         }
-        if (stderr) {
-          reject(stderr);
-          return;
-        }
-        if (stdout) {
-          resolve(stdout);
-          return;
-        }
-      })
+        return reject(error);
+      }
+      if (stderr) {
+        return reject(new Error(stderr));
+      }
+      resolve(stdout);
     });
+  });
 }

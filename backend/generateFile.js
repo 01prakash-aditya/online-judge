@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { join, dirname } from 'path';
+import path, { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuid } from 'uuid';
 
@@ -12,7 +12,7 @@ if (!existsSync(dirCodes)) {
   mkdirSync(dirCodes, { recursive: true });
 }
 
-export function generateFile(language, code) {
+export function generateFile( language = 'cpp',code) {
   const jobId   = uuid();
   const fileName = `${jobId}.${language}`;
   const filePath = join(dirCodes, fileName);

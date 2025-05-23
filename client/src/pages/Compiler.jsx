@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { compileAndRun } from '../services/api.js';
 
 export default function Compiler() {
   const { currentUser } = useSelector((state) => state.user);
@@ -18,7 +19,6 @@ export default function Compiler() {
   const [testCaseIndex, setTestCaseIndex] = useState(0);
   const location = useLocation();
 
-  // Default sample problems
   const sampleProblems = [
     {
       id: 1,
@@ -100,63 +100,34 @@ export default function Compiler() {
   };
 
   const handleCompile = async () => {
-    setIsCompiling(true);
-    setStatusMessage('Compiling and executing...');
-    setOutput('');
+  setIsCompiling(true);
+  setStatusMessage('Compiling and executing...');
+  setOutput('');
 
-    try {
-      // Simulate backend processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
+  try {
+    const result = await compileAndRun( language, code);
+    
+    setOutput(result.output); 
+    setStatusMessage('Success: Program executed successfully');
+    
+    if (selectedProblem && selectedProblem.testCases) {
+      const expectedOutput = selectedProblem.testCases[testCaseIndex].expectedOutput.trim();
+      const actualOutput = result.output.trim();
       
-      let result = '';
-      let status = '';
-      let time = 0;
-      let memory = 0;
-      
-      if (language === 'cpp') {
-        if (selectedProblem && selectedProblem.testCases && selectedProblem.testCases[testCaseIndex]) {
-          const expectedOutput = selectedProblem.testCases[testCaseIndex].expectedOutput;
-          
-          if (selectedProblem.id === 1) {
-            result = "Hello World";
-            status = result === expectedOutput ? 
-              'Success: Correct output! Test case passed.' : 
-              'Error: Incorrect output. Expected: ' + expectedOutput;
-          } else if (selectedProblem.id === 2) {
-            const nums = input.split(' ').map(Number);
-            if (nums.length >= 2) {
-              result = String(nums[0] + nums[1]);
-              status = result === expectedOutput ? 
-                'Success: Correct output! Test case passed.' : 
-                'Error: Incorrect output. Expected: ' + expectedOutput;
-            } else {
-              result = "Error: Invalid input format";
-              status = 'Error: Invalid input format';
-            }
-          } else {
-            result = 'Program output would appear here based on your input and code.\nThis is a frontend mockup.';
-            status = 'Info: Mockup output. This is a frontend simulation.';
-          }
-        } else {
-          result = 'Hello, AlgoU!';
-          status = 'Success: Program executed successfully';
-        }
-        
-        time = Math.random() * 0.1;
-        memory = Math.round(Math.random() * 500) + 500;
+      if (actualOutput === expectedOutput) {
+        setStatusMessage('Success: Correct output! Test case passed.');
+      } else {
+        setStatusMessage(`Error: Expected "${expectedOutput}", Got "${actualOutput}"`);
       }
-      
-      setOutput(result);
-      setStatusMessage(status);
-      setExecutionTime(time.toFixed(3));
-      setMemoryUsage(memory);
-    } catch (error) {
-      setOutput('Error: Failed to compile or execute program.');
-      setStatusMessage('Error: Compilation failed');
-    } finally {
-      setIsCompiling(false);
     }
-  };
+    
+  } catch (error) {
+    setOutput(`Error: ${error.message}`);
+    setStatusMessage('Compilation failed');
+  } finally {
+    setIsCompiling(false);
+  }
+};
   
   const handleSaveSolution = () => {
     if (!currentUser) {
@@ -179,54 +150,57 @@ export default function Compiler() {
   };
 
   const runAllTestCases = async () => {
-    if (!selectedProblem || !selectedProblem.testCases || selectedProblem.testCases.length === 0) {
-      return;
-    }
+  if (!selectedProblem || !selectedProblem.testCases || selectedProblem.testCases.length === 0) {
+    return;
+  }
 
-    setIsCompiling(true);
-    setStatusMessage('Running all test cases...');
-    setOutput('');
+  setIsCompiling(true);
+  setStatusMessage('Running all test cases...');
+  setOutput('');
 
-    let results = [];
-    let allPassed = true;
+  let results = [];
+  let allPassed = true;
 
-    for (let i = 0; i < selectedProblem.testCases.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const testCase = selectedProblem.testCases[i];
+  for (let i = 0; i < selectedProblem.testCases.length; i++) {
+    const testCase = selectedProblem.testCases[i];
+    
+    try {
+      const result = await compileAndRun(language, code);
       let passed = false;
       let output = '';
 
-      if (selectedProblem.id === 1) {
-        output = "Hello World";
-        passed = output === testCase.expectedOutput;
-      } else if (selectedProblem.id === 2) {
-        const nums = testCase.input.split(' ').map(Number);
-        if (nums.length >= 2) {
-          output = String(nums[0] + nums[1]);
-          passed = output === testCase.expectedOutput;
-        }
+      if (result.success) {
+        output = result.output.trim();
+        passed = output === testCase.expectedOutput.trim();
       } else {
-        passed = Math.random() > 0.3;
-        output = passed ? testCase.expectedOutput : "Some incorrect output";
+        output = `Error: ${result.error}`;
+        passed = false;
       }
 
       results.push({ testCase, output, passed });
       if (!passed) allPassed = false;
+    } catch (error) {
+      results.push({ 
+        testCase, 
+        output: `Error: ${error.message}`, 
+        passed: false 
+      });
+      allPassed = false;
     }
+  }
 
-    setIsCompiling(false);
-    
-    const resultsOutput = results.map((result, idx) => {
-      return `Test Case ${idx + 1}: ${result.passed ? 'PASSED ✓' : 'FAILED ✗'}\n` +
-             `Input: ${result.testCase.input || '(empty)'}\n` +
-             `Expected: ${result.testCase.expectedOutput}\n` + 
-             `Got: ${result.output}\n${'-'.repeat(40)}`;
-    }).join('\n');
-    
-    setOutput(`${resultsOutput}\n\nSummary: ${results.filter(r => r.passed).length}/${results.length} test cases passed.`);
-    setStatusMessage(allPassed ? 'Success: All test cases passed!' : 'Warning: Some test cases failed');
-  };
+  setIsCompiling(false);
+  
+  const resultsOutput = results.map((result, idx) => {
+    return `Test Case ${idx + 1}: ${result.passed ? 'PASSED ✓' : 'FAILED ✗'}\n` +
+           `Input: ${result.testCase.input || '(empty)'}\n` +
+           `Expected: ${result.testCase.expectedOutput}\n` + 
+           `Got: ${result.output}\n${'-'.repeat(40)}`;
+  }).join('\n');
+  
+  setOutput(`${resultsOutput}\n\nSummary: ${results.filter(r => r.passed).length}/${results.length} test cases passed.`);
+  setStatusMessage(allPassed ? 'Success: All test cases passed!' : 'Warning: Some test cases failed');
+};
 
   const getProblemById = (id) => {
     const idNumber = parseInt(id);
