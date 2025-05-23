@@ -1,11 +1,18 @@
 import express from 'express';
 const app = express();
+import cors from 'cors';
 import { generateFile } from './generateFile.js';
 import { executeCpp } from './executeCpp.js';
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cors({
+  origin: ['http://localhost:5173'],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.post('/run', async (req, res) => {
     const {language='cpp', code } = req.body;
