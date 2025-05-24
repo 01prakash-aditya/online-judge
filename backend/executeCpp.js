@@ -12,25 +12,49 @@ if (!existsSync(outputPath)) {
   mkdirSync(outputPath, { recursive: true });
 }
 
-export function executeCpp(filePath) {
+export function executeCpp(filePath, input = '') {
   const jobId = path.basename(filePath).split('.')[0];
   const outfileName = `${jobId}.exe`;
   const outputFilePath = join(outputPath, outfileName);
   
   return new Promise((resolve, reject) => {
-    const command = `g++ ${filePath} -o ${outputFilePath} && ${outputFilePath}`;
+    const compileCommand = `g++ "${filePath}" -o "${outputFilePath}"`;
     
-    exec(command, { timeout: 5000 }, (error, stdout, stderr) => {
-      if (error) {
-        if (error.code === 'TIMEOUT') {
-          return reject(new Error('Execution timeout (5 seconds exceeded)'));
+    exec(compileCommand, { timeout: 10000 }, (compileError, compileStdout, compileStderr) => {
+      if (compileError) {
+        if (compileError.signal === 'SIGTERM') {
+          return reject(new Error('Compilation timeout (10 seconds exceeded)'));
         }
-        return reject(error);
+        return reject(new Error(`Compilation error: ${compileStderr || compileError.message}`));
       }
-      if (stderr) {
-        return reject(new Error(stderr));
+      
+      if (compileStderr && compileStderr.trim() !== '') {
+        return reject(new Error(`Compilation error: ${compileStderr}`));
       }
-      resolve(stdout);
+      
+      const executeCommand = `"${outputFilePath}"`;
+      const childProcess = exec(executeCommand, { 
+        timeout: 10000,
+        cwd: outputPath 
+      }, (executeError, executeStdout, executeStderr) => {
+        if (executeError) {
+          if (executeError.signal === 'SIGTERM') {
+            return reject(new Error('Execution timeout (10 seconds exceeded)'));
+          }
+          return reject(new Error(`Runtime error: ${executeError.message}`));
+        }
+        
+        if (executeStderr && executeStderr.trim() !== '' && (!executeStdout || executeStdout.trim() === '')) {
+          return reject(new Error(`Runtime error: ${executeStderr}`));
+        }
+        
+        resolve(executeStdout || '');
+      });
+      
+      if (input && input.trim() !== '') {
+        childProcess.stdin.write(input);
+      }
+      childProcess.stdin.end();
     });
   });
 }

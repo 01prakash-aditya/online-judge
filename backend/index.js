@@ -15,7 +15,7 @@ app.use(cors({
 }));
 
 app.post('/run', async (req, res) => {
-    const {language='cpp', code } = req.body;
+    const { language = 'cpp', code, input = '' } = req.body;
     
     if (code === undefined || !code) {
         return res.status(400).json({
@@ -24,13 +24,15 @@ app.post('/run', async (req, res) => {
         });
     }
 
-    try{
+    try {
         const filePath = generateFile(language, code);
-        const output = await executeCpp(filePath);
+        const output = await executeCpp(filePath, input);
         res.json({
-        filePath,
-        output,
-    });
+            filePath,
+            output,
+            input: input || 'No input provided',
+            success: true
+        });
     }
     catch (error) {
         console.error('Error:', error.message);
@@ -39,8 +41,6 @@ app.post('/run', async (req, res) => {
             error: error.message,
         });
     }
-    
-    
 });
 
 app.get('/', (req, res) => {

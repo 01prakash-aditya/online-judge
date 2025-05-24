@@ -100,58 +100,58 @@ export default function Compiler() {
   };
 
   const handleCompile = async () => {
-  setIsCompiling(true);
-  setStatusMessage('Compiling and executing...');
-  setOutput('');
-  
-  try {
-    const result = await compileAndRun(language, code);
+    setIsCompiling(true);
+    setStatusMessage('Compiling and executing...');
+    setOutput('');
     
-    if (result.success === false) {
-      console.log('Original error:', result.error);
+    try {
+      const result = await compileAndRun(language, code, input);
       
-      let errorMessage = result.error;
+      if (result.success === false) {
+        console.log('Original error:', result.error);
+        
+        let errorMessage = result.error;
 
-      if (errorMessage.includes('Command failed:')) {
-        const firstNewlineIndex = errorMessage.indexOf('\n');
-        if (firstNewlineIndex !== -1) {
-          errorMessage = errorMessage.substring(firstNewlineIndex + 1).trim();
+        if (errorMessage.includes('Command failed:')) {
+          const firstNewlineIndex = errorMessage.indexOf('\n');
+          if (firstNewlineIndex !== -1) {
+            errorMessage = errorMessage.substring(firstNewlineIndex + 1).trim();
+          }
         }
+        
+        console.log('Cleaned error:', errorMessage);
+        
+        if (!errorMessage || errorMessage.trim() === '') {
+          errorMessage = result.error || 'Unknown compilation error';
+        }
+        
+        setOutput(errorMessage);
+        setStatusMessage('Compilation failed');
+        return;
       }
       
-      console.log('Cleaned error:', errorMessage);
+      setOutput(result.output);
       
-      if (!errorMessage || errorMessage.trim() === '') {
-        errorMessage = result.error || 'Unknown compilation error';
-      }
-      
-      setOutput(errorMessage);
-      setStatusMessage('Compilation failed');
-      return;
-    }
-    
-    setOutput(result.output);
-    
-    if (selectedProblem && selectedProblem.testCases) {
-      const expectedOutput = selectedProblem.testCases[testCaseIndex].expectedOutput.trim();
-      const actualOutput = result.output.trim();
-      
-      if (actualOutput === expectedOutput) {
-        setStatusMessage('Success: Correct output! Test case passed.');
+      if (selectedProblem && selectedProblem.testCases) {
+        const expectedOutput = selectedProblem.testCases[testCaseIndex].expectedOutput.trim();
+        const actualOutput = result.output.trim();
+        
+        if (actualOutput === expectedOutput) {
+          setStatusMessage('Success: Correct output! Test case passed.');
+        } else {
+          setStatusMessage(`Test Failed: Expected "${expectedOutput}", Got "${actualOutput}"`);
+        }
       } else {
-        setStatusMessage(`Test Failed: Expected "${expectedOutput}", Got "${actualOutput}"`);
+        setStatusMessage('Success: Program executed successfully');
       }
-    } else {
-      setStatusMessage('Success: Program executed successfully');
+      
+    } catch (error) {
+      setOutput(`Error: ${error.message}`);
+      setStatusMessage('Compilation failed');
+    } finally {
+      setIsCompiling(false);
     }
-    
-  } catch (error) {
-    setOutput(`Error: ${error.message}`);
-    setStatusMessage('Compilation failed');
-  } finally {
-    setIsCompiling(false);
-  }
-};
+  };
 
   const handleSaveSolution = () => {
     if (!currentUser) {
@@ -174,57 +174,57 @@ export default function Compiler() {
   };
 
   const runAllTestCases = async () => {
-  if (!selectedProblem || !selectedProblem.testCases || selectedProblem.testCases.length === 0) {
-    return;
-  }
-
-  setIsCompiling(true);
-  setStatusMessage('Running all test cases...');
-  setOutput('');
-
-  let results = [];
-  let allPassed = true;
-
-  for (let i = 0; i < selectedProblem.testCases.length; i++) {
-    const testCase = selectedProblem.testCases[i];
-    
-    try {
-      const result = await compileAndRun(language, code);
-      let passed = false;
-      let output = '';
-
-      if (result.success) {
-        output = result.output.trim();
-        passed = output === testCase.expectedOutput.trim();
-      } else {
-        output = `Error: ${result.error}`;
-        passed = false;
-      }
-
-      results.push({ testCase, output, passed });
-      if (!passed) allPassed = false;
-    } catch (error) {
-      results.push({ 
-        testCase, 
-        output: `Error: ${error.message}`, 
-        passed: false 
-      });
-      allPassed = false;
+    if (!selectedProblem || !selectedProblem.testCases || selectedProblem.testCases.length === 0) {
+      return;
     }
-  }
 
-  setIsCompiling(false);
-  
-  const resultsOutput = results.map((result, idx) => {
-    return `Test Case ${idx + 1}: ${result.passed ? 'PASSED ✓' : 'FAILED ✗'}\n` +
-           `Input: ${result.testCase.input || '(empty)'}\n` +
-           `Expected: ${result.testCase.expectedOutput}\n` + 
-           `Got: ${result.output}\n${'-'.repeat(40)}`;
-  }).join('\n');
-  
-  setOutput(`${resultsOutput}\n\nSummary: ${results.filter(r => r.passed).length}/${results.length} test cases passed.`);
-  setStatusMessage(allPassed ? 'Success: All test cases passed!' : 'Warning: Some test cases failed');
-};
+    setIsCompiling(true);
+    setStatusMessage('Running all test cases...');
+    setOutput('');
+
+    let results = [];
+    let allPassed = true;
+
+    for (let i = 0; i < selectedProblem.testCases.length; i++) {
+      const testCase = selectedProblem.testCases[i];
+      
+      try {
+        const result = await compileAndRun(language, code, testCase.input);
+        let passed = false;
+        let output = '';
+
+        if (result.success !== false) {
+          output = result.output ? result.output.trim() : '';
+          passed = output === testCase.expectedOutput.trim();
+        } else {
+          output = `Error: ${result.error}`;
+          passed = false;
+        }
+
+        results.push({ testCase, output, passed });
+        if (!passed) allPassed = false;
+      } catch (error) {
+        results.push({ 
+          testCase, 
+          output: `Error: ${error.message}`, 
+          passed: false 
+        });
+        allPassed = false;
+      }
+    }
+
+    setIsCompiling(false);
+    
+    const resultsOutput = results.map((result, idx) => {
+      return `Test Case ${idx + 1}: ${result.passed ? 'PASSED ✓' : 'FAILED ✗'}\n` +
+             `Input: ${result.testCase.input || '(empty)'}\n` +
+             `Expected: ${result.testCase.expectedOutput}\n` + 
+             `Got: ${result.output}\n${'-'.repeat(40)}`;
+    }).join('\n');
+    
+    setOutput(`${resultsOutput}\n\nSummary: ${results.filter(r => r.passed).length}/${results.length} test cases passed.`);
+    setStatusMessage(allPassed ? 'Success: All test cases passed!' : 'Warning: Some test cases failed');
+  };
 
   const getProblemById = (id) => {
     const idNumber = parseInt(id);
@@ -336,9 +336,10 @@ export default function Compiler() {
             {selectedProblem.testCases && selectedProblem.testCases.length > 1 && (
               <button 
                 onClick={runAllTestCases}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                disabled={isCompiling}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-70"
               >
-                Run All Test Cases
+                {isCompiling ? 'Running...' : 'Run All Test Cases'}
               </button>
             )}
           </div>
@@ -480,7 +481,7 @@ export default function Compiler() {
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
           <li>• Press <kbd className="bg-gray-100 px-1 rounded">Ctrl</kbd> + <kbd className="bg-gray-100 px-1 rounded">Enter</kbd> to compile and run</li>
           <li>• Currently supporting C++ (more languages coming soon)</li>
-          <li>• Maximum execution time limit: 5 seconds</li>
+          <li>• Maximum execution time limit: 10 seconds</li>
           <li>• Memory limit: 512MB</li>
           <li>• Save your solutions to revisit them later</li>
           <li>• Solve questions to improve your rating</li>

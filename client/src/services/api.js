@@ -1,6 +1,7 @@
+// api.js
 const API_BASE_URL = 'http://localhost:8000';
 
-export const compileAndRun = async (language = 'cpp', code) => {
+export const compileAndRun = async (language, code, input = '') => {
   try {
     const response = await fetch(`${API_BASE_URL}/run`, {
       method: 'POST',
@@ -10,24 +11,19 @@ export const compileAndRun = async (language = 'cpp', code) => {
       body: JSON.stringify({
         language,
         code,
-      })
+        input
+      }),
     });
 
+    const result = await response.json();
+    
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Compilation failed');
+      throw new Error(result.error || 'Failed to compile and run code');
     }
 
-    const data = await response.json();
-    return {
-      success: true,
-      output: data.output,
-      filePath: data.filePath
-    };
+    return result;
   } catch (error) {
-    return {
-      success: false,
-      error: error.message
-    };
+    console.error('API Error:', error);
+    throw error;
   }
 };
