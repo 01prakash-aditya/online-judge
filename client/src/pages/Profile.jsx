@@ -33,6 +33,7 @@ export default function Profile() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', 
         body: JSON.stringify(formData),
       });
       const data = await res.json();
@@ -58,6 +59,7 @@ export default function Profile() {
         dispatch(deleteUserStart());
         const res = await fetch(`/api/user/delete/${currentUser._id}`, {
           method: 'DELETE',
+          credentials: 'include', 
         });
         const data = await res.json();
         if (data.success === false) {
@@ -72,7 +74,9 @@ export default function Profile() {
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/auth/signout');
+      await fetch('/api/auth/signout', {
+        credentials: 'include' 
+      });
       dispatch(SignOut());
       window.location.href = '/sign-in';
     } catch (error) {

@@ -12,7 +12,6 @@ export default function ContributePage() {
   const [debugInfo, setDebugInfo] = useState(null);
   const [fetchLoading, setFetchLoading] = useState(false);
 
-  // Form state
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -37,7 +36,7 @@ export default function ContributePage() {
 
   const fetchAllProblems = async () => {
     setFetchLoading(true);
-    setMessage({ type: '', text: '' }); // Clear any existing messages
+    setMessage({ type: '', text: '' }); 
     
     try {
       console.log('Fetching all problems...');
@@ -49,7 +48,6 @@ export default function ContributePage() {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          // Add explicit authorization header if available
           ...(currentUser?.token && { 'Authorization': `Bearer ${currentUser.token}` })
         }
       });
@@ -79,7 +77,6 @@ export default function ContributePage() {
         setDebugInfo(data.debug);
         console.log('Problems set:', (data.problems || []).length);
         
-        // Log each problem for debugging
         (data.problems || []).forEach((problem, index) => {
           console.log(`Problem ${index + 1}:`, {
             id: problem._id,
@@ -95,7 +92,6 @@ export default function ContributePage() {
     } catch (error) {
       console.error('Error fetching problems:', error);
       
-      // Provide more specific error messages
       let errorMessage = 'Error fetching problems: ';
       if (error.message.includes('403') || error.message.includes('Access denied')) {
         errorMessage += 'Access denied. Please ensure you have admin privileges and are properly authenticated.';
@@ -275,7 +271,6 @@ export default function ContributePage() {
     fetchAllProblems();
   };
 
-  // Add a debug function to check authentication
   const handleDebugAuth = async () => {
     try {
       console.log('=== DEBUG AUTH INFO ===');
