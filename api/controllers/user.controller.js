@@ -9,26 +9,50 @@ export const test = (req, res) => {
 };
 
 // updating user
-
 export const updateUser = async (req, res, next) => {
     if(req.user.id !== req.params.id) {
         return next(errorHandler(401, "You can only update your own account!"));
     }
     try{
-        if(req.body.password) {
-            req.body.password = await bcrypt.hashSync(req.body.password, 10);
+        const currentUser = await User.findById(req.params.id);
+        if (!currentUser) {
+            return next(errorHandler(404, "User not found!"));
         }
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, {
-            $set: {
-               fullName: req.body.fullName,
-                email: req.body.email,
-                password: req.body.password,
-                dob: req.body.dob,
-                bio: req.body.bio,
-                profilePicture: req.body.profilePicture,
-                role: req.body.role || 'user'
+
+        const updateData = {};
+
+        if (req.body.fullName !== undefined) {
+            updateData.fullName = req.body.fullName;
+        }
+        if (req.body.email !== undefined) {
+            updateData.email = req.body.email;
+        }
+        if (req.body.dob !== undefined) {
+            updateData.dob = req.body.dob;
+        }
+        if (req.body.bio !== undefined) {
+            updateData.bio = req.body.bio;
+        }
+        if (req.body.profilePicture !== undefined) {
+            updateData.profilePicture = req.body.profilePicture;
+        }
+
+        if (req.body.password && req.body.password.trim() !== '') {
+            updateData.password = bcrypt.hashSync(req.body.password, 10);
+        }
+
+        if (req.body.role !== undefined) {
+            if (req.user.role === 'admin' || req.body.role === currentUser.role) {
+                updateData.role = req.body.role;
             }
-        }, {new: true});
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id, 
+            { $set: updateData }, 
+            { new: true }
+        );
+
         const { password, ...others } = updatedUser._doc;
         res.status(200).json(others);
     } catch(error) {
