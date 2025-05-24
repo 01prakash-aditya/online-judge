@@ -6,7 +6,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
 import Compiler from "./pages/Compiler";
-import ProblemSet from "./pages/Problemset";
+import ProblemSet from "./pages/ProblemSet";
 import Contribute from "./pages/Contribute";
 import PrivateRoute from "./components/PrivateRoute";
 

@@ -20,23 +20,23 @@ export default function Compiler() {
   const location = useLocation();
 
   const sampleProblems = [
-    {
-      id: 1,
-      title: "Hello World",
-      description: "Print 'Hello World' to the console.",
-      defaultCode: '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your code here\n    return 0;\n}',
-      testCases: [{ input: '', expectedOutput: 'Hello World' }]
-    },
-    {
-      id: 2,
-      title: "Sum of Two Numbers",
-      description: "Given two integers as input, print their sum.",
-      defaultCode: '#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    // Write your code here\n    return 0;\n}',
-      testCases: [
-        { input: '5 7', expectedOutput: '12' },
-        { input: '10 -3', expectedOutput: '7' }
-      ]
-    }
+    // {
+    //   id: 1,
+    //   title: "Hello World",
+    //   description: "Print 'Hello World' to the console.",
+    //   defaultCode: '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your code here\n    return 0;\n}',
+    //   testCases: [{ input: '', expectedOutput: 'Hello World' }]
+    // },
+    // {
+    //   id: 2,
+    //   title: "Sum of Two Numbers",
+    //   description: "Given two integers as input, print their sum.",
+    //   defaultCode: '#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    // Write your code here\n    return 0;\n}',
+    //   testCases: [
+    //     { input: '5 7', expectedOutput: '12' },
+    //     { input: '10 -3', expectedOutput: '7' }
+    //   ]
+    // }
   ];
 
   useEffect(() => {
@@ -103,12 +103,34 @@ export default function Compiler() {
   setIsCompiling(true);
   setStatusMessage('Compiling and executing...');
   setOutput('');
-
+  
   try {
-    const result = await compileAndRun( language, code);
+    const result = await compileAndRun(language, code);
     
-    setOutput(result.output); 
-    setStatusMessage('Success: Program executed successfully');
+    if (result.success === false) {
+      console.log('Original error:', result.error);
+      
+      let errorMessage = result.error;
+
+      if (errorMessage.includes('Command failed:')) {
+        const firstNewlineIndex = errorMessage.indexOf('\n');
+        if (firstNewlineIndex !== -1) {
+          errorMessage = errorMessage.substring(firstNewlineIndex + 1).trim();
+        }
+      }
+      
+      console.log('Cleaned error:', errorMessage);
+      
+      if (!errorMessage || errorMessage.trim() === '') {
+        errorMessage = result.error || 'Unknown compilation error';
+      }
+      
+      setOutput(errorMessage);
+      setStatusMessage('Compilation failed');
+      return;
+    }
+    
+    setOutput(result.output);
     
     if (selectedProblem && selectedProblem.testCases) {
       const expectedOutput = selectedProblem.testCases[testCaseIndex].expectedOutput.trim();
@@ -117,8 +139,10 @@ export default function Compiler() {
       if (actualOutput === expectedOutput) {
         setStatusMessage('Success: Correct output! Test case passed.');
       } else {
-        setStatusMessage(`Error: Expected "${expectedOutput}", Got "${actualOutput}"`);
+        setStatusMessage(`Test Failed: Expected "${expectedOutput}", Got "${actualOutput}"`);
       }
+    } else {
+      setStatusMessage('Success: Program executed successfully');
     }
     
   } catch (error) {
@@ -128,7 +152,7 @@ export default function Compiler() {
     setIsCompiling(false);
   }
 };
-  
+
   const handleSaveSolution = () => {
     if (!currentUser) {
       setStatusMessage('Please sign in to save your solution');

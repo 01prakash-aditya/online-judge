@@ -1,378 +1,538 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Trash2, Edit3, Check, X, Plus, Eye, RefreshCw } from 'lucide-react';
 
-export default function Contribute() {
+export default function ContributePage() {
   const { currentUser } = useSelector((state) => state.user);
-  const navigate = useNavigate();
-  
+  const [activeTab, setActiveTab] = useState('create');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const [allProblems, setAllProblems] = useState([]);
+  const [editingProblem, setEditingProblem] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
+  const [fetchLoading, setFetchLoading] = useState(false);
+
+  // Form state
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    difficulty: 'Easy',
-    category: 'Array',
-    inputFormat: '',
-    outputFormat: '',
-    constraints: '',
-    sampleInput: '',
-    sampleOutput: '',
-    explanation: '',
-    testCases: [{ input: '', output: '' }]
+    difficulty: 'easy',
+    rating: 50,
+    tags: '',
+    defaultCode: '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your code here\n    return 0;\n}',
+    testCases: [{ input: '', expectedOutput: '' }]
   });
-  
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
-  const difficulties = ['Easy', 'Medium', 'Hard'];
-  const categories = [
-    'Array', 'String', 'Linked List', 'Stack', 'Queue', 'Tree', 
-    'Graph', 'Dynamic Programming', 'Greedy', 'Backtracking', 
-    'Sorting', 'Searching', 'Math', 'Bit Manipulation'
-  ];
+  useEffect(() => {
+    if (currentUser?.role === 'admin') {
+      fetchAllProblems();
+    }
+  }, [currentUser]);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value
-    });
+  useEffect(() => {
+    if (activeTab === 'manage' && currentUser?.role === 'admin') {
+      fetchAllProblems();
+    }
+  }, [activeTab, currentUser]);
+
+  const fetchAllProblems = async () => {
+    setFetchLoading(true);
+    setMessage({ type: '', text: '' }); // Clear any existing messages
+    
+    try {
+      console.log('Fetching all problems...');
+      console.log('Current user:', currentUser);
+      console.log('User role:', currentUser?.role);
+      
+      const res = await fetch('/api/problems/all', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add explicit authorization header if available
+          ...(currentUser?.token && { 'Authorization': `Bearer ${currentUser.token}` })
+        }
+      });
+      
+      console.log('Response status:', res.status);
+      console.log('Response headers:', res.headers);
+      
+      if (res.status === 403) {
+        throw new Error('Access denied. Admin privileges required.');
+      }
+      
+      if (res.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Error response:', errorText);
+        throw new Error(`HTTP error! status: ${res.status} - ${errorText}`);
+      }
+      
+      const data = await res.json();
+      console.log('Fetched data:', data);
+      
+      if (data.success) {
+        setAllProblems(data.problems || []);
+        setDebugInfo(data.debug);
+        console.log('Problems set:', (data.problems || []).length);
+        
+        // Log each problem for debugging
+        (data.problems || []).forEach((problem, index) => {
+          console.log(`Problem ${index + 1}:`, {
+            id: problem._id,
+            title: problem.title,
+            isApproved: problem.isApproved,
+            createdBy: problem.createdBy?.username
+          });
+        });
+      } else {
+        console.error('Failed to fetch problems:', data.message);
+        setMessage({ type: 'error', text: data.message || 'Failed to fetch problems' });
+      }
+    } catch (error) {
+      console.error('Error fetching problems:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = 'Error fetching problems: ';
+      if (error.message.includes('403') || error.message.includes('Access denied')) {
+        errorMessage += 'Access denied. Please ensure you have admin privileges and are properly authenticated.';
+      } else if (error.message.includes('401') || error.message.includes('Authentication failed')) {
+        errorMessage += 'Authentication failed. Please log out and log in again.';
+      } else if (error.message.includes('Failed to fetch')) {
+        errorMessage += 'Network error. Please check your connection and try again.';
+      } else {
+        errorMessage += error.message;
+      }
+      
+      setMessage({ type: 'error', text: errorMessage });
+    } finally {
+      setFetchLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleTestCaseChange = (index, field, value) => {
     const updatedTestCases = [...formData.testCases];
     updatedTestCases[index][field] = value;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       testCases: updatedTestCases
-    });
+    }));
   };
 
   const addTestCase = () => {
-    setFormData({
-      ...formData,
-      testCases: [...formData.testCases, { input: '', output: '' }]
-    });
+    setFormData(prev => ({
+      ...prev,
+      testCases: [...prev.testCases, { input: '', expectedOutput: '' }]
+    }));
   };
 
   const removeTestCase = (index) => {
     if (formData.testCases.length > 1) {
       const updatedTestCases = formData.testCases.filter((_, i) => i !== index);
-      setFormData({
-        ...formData,
+      setFormData(prev => ({
+        ...prev,
         testCases: updatedTestCases
-      });
+      }));
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      difficulty: 'easy',
+      rating: 50,
+      tags: '',
+      defaultCode: '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your code here\n    return 0;\n}',
+      testCases: [{ input: '', expectedOutput: '' }]
+    });
+    setEditingProblem(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setMessage({ type: '', text: '' });
 
     try {
-      // Get API URL from environment or use relative path
-      const apiUrl = process.env.REACT_APP_API_URL || '';
+      const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
       
-      const response = await fetch(`${apiUrl}/api/problems/contribute`, {
-        method: 'POST',
+      const submitData = {
+        ...formData,
+        tags: tagsArray,
+        rating: parseInt(formData.rating)
+      };
+
+      const url = editingProblem ? `/api/problems/update/${editingProblem._id}` : '/api/problems/create';
+      const method = editingProblem ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentUser?.token || ''}` // Include auth token if available
+          // Add explicit authorization header if available
+          ...(currentUser?.token && { 'Authorization': `Bearer ${currentUser.token}` })
         },
-        credentials: 'include', // Include cookies for authentication
-        body: JSON.stringify({
-          ...formData,
-          contributedBy: currentUser?._id || currentUser?.id
-        })
+        credentials: 'include',
+        body: JSON.stringify(submitData)
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to submit problem');
+      if (data.success) {
+        setMessage({ type: 'success', text: data.message });
+        resetForm();
+        if (currentUser.role === 'admin') {
+          fetchAllProblems();
+        }
+      } else {
+        setMessage({ type: 'error', text: data.message });
       }
-
-      setSuccess('Problem submitted successfully! It will be reviewed before being added to the problemset.');
-      setFormData({
-        title: '',
-        description: '',
-        difficulty: 'Easy',
-        category: 'Array',
-        inputFormat: '',
-        outputFormat: '',
-        constraints: '',
-        sampleInput: '',
-        sampleOutput: '',
-        explanation: '',
-        testCases: [{ input: '', output: '' }]
-      });
-
-    } catch (err) {
-      console.error('Error submitting problem:', err);
-      setError(err.message || 'Failed to submit problem. Please check your connection and try again.');
+    } catch (error) {
+      console.error('Submit error:', error);
+      setMessage({ type: 'error', text: 'Something went wrong. Please try again.' });
     } finally {
       setLoading(false);
     }
   };
 
-  // Redirect if not logged in
+  const handleEdit = (problem) => {
+    setFormData({
+      title: problem.title,
+      description: problem.description,
+      difficulty: problem.difficulty,
+      rating: problem.rating,
+      tags: problem.tags.join(', '),
+      defaultCode: problem.defaultCode,
+      testCases: problem.testCases
+    });
+    setEditingProblem(problem);
+    setActiveTab('create');
+  };
+
+  const handleDelete = async (problemId) => {
+    if (!confirm('Are you sure you want to delete this problem?')) return;
+
+    try {
+      const res = await fetch(`/api/problems/delete/${problemId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(currentUser?.token && { 'Authorization': `Bearer ${currentUser.token}` })
+        }
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Problem deleted successfully' });
+        fetchAllProblems();
+      } else {
+        setMessage({ type: 'error', text: data.message });
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      setMessage({ type: 'error', text: 'Error deleting problem' });
+    }
+  };
+
+  const handleApprove = async (problemId) => {
+    try {
+      const res = await fetch(`/api/problems/approve/${problemId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(currentUser?.token && { 'Authorization': `Bearer ${currentUser.token}` })
+        }
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Problem approved successfully' });
+        fetchAllProblems();
+      } else {
+        setMessage({ type: 'error', text: data.message });
+      }
+    } catch (error) {
+      console.error('Approve error:', error);
+      setMessage({ type: 'error', text: 'Error approving problem' });
+    }
+  };
+
+  const handleRefreshProblems = () => {
+    fetchAllProblems();
+  };
+
+  // Add a debug function to check authentication
+  const handleDebugAuth = async () => {
+    try {
+      console.log('=== DEBUG AUTH INFO ===');
+      console.log('Current User:', currentUser);
+      console.log('User Role:', currentUser?.role);
+      console.log('User ID:', currentUser?.id);
+      console.log('Document Cookies:', document.cookie);
+      
+      // Test a simple authenticated request
+      const testRes = await fetch('/api/user/test', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      console.log('Test auth response status:', testRes.status);
+      
+      if (testRes.ok) {
+        const testData = await testRes.json();
+        console.log('Test auth response:', testData);
+      }
+    } catch (error) {
+      console.error('Debug auth error:', error);
+    }
+  };
+
   if (!currentUser) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-50'>
-        <div className='max-w-md w-full bg-white p-8 rounded-lg shadow-md text-center'>
-          <h2 className='text-2xl font-bold mb-4 text-slate-800'>Login Required</h2>
-          <p className='text-slate-600 mb-6'>You need to be logged in to contribute problems.</p>
-          <button
-            onClick={() => navigate('/sign-in')}
-            className='bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700'
-          >
-            Sign In
-          </button>
-        </div>
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <h1 className="text-3xl font-bold mb-4">Contribute Problems</h1>
+        <p className="text-gray-600">Please sign in to contribute problems to our platform.</p>
       </div>
     );
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8'>
-      <div className='max-w-4xl mx-auto px-4'>
-        <div className='bg-white rounded-lg shadow-md p-8'>
-          <h1 className='text-3xl font-bold mb-2 text-slate-800'>Contribute a Problem</h1>
-          <p className='text-slate-600 mb-8'>
-            Help grow our problem bank by contributing high-quality algorithmic challenges.
-          </p>
+    <div className="max-w-6xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">Contribute Problems</h1>
 
-          {error && (
-            <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6'>
-              {error}
-            </div>
-          )}
+      {/* Debug section for admins */}
+      {currentUser?.role === 'admin' && (
+        <div className="mb-4">
+          <button
+            onClick={handleDebugAuth}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+          >
+            Debug Authentication
+          </button>
+        </div>
+      )}
 
-          {success && (
-            <div className='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6'>
-              {success}
-            </div>
-          )}
+      {/* Tab Navigation */}
+      <div className="flex mb-6 border-b">
+        <button
+          onClick={() => setActiveTab('create')}
+          className={`px-6 py-3 ${activeTab === 'create' 
+            ? 'border-b-2 border-blue-600 text-blue-600' 
+            : 'text-gray-600 hover:text-gray-800'}`}
+        >
+          {editingProblem ? 'Edit Problem' : 'Create Problem'}
+        </button>
+        {currentUser?.role === 'admin' && (
+          <button
+            onClick={() => setActiveTab('manage')}
+            className={`px-6 py-3 ${activeTab === 'manage' 
+              ? 'border-b-2 border-blue-600 text-blue-600' 
+              : 'text-gray-600 hover:text-gray-800'}`}
+          >
+            Manage Problems
+          </button>
+        )}
+      </div>
 
-          <form onSubmit={handleSubmit} className='space-y-6'>
+      {/* Success/Error Message */}
+      {message.text && (
+        <div className={`mb-6 p-4 rounded-lg ${
+          message.type === 'success' 
+            ? 'bg-green-100 text-green-800 border border-green-200' 
+            : 'bg-red-100 text-red-800 border border-red-200'
+        }`}>
+          {message.text}
+        </div>
+      )}
+
+      {/* Debug Info for Admin */}
+      {currentUser?.role === 'admin' && debugInfo && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 className="font-medium text-blue-800 mb-2">Debug Information:</h3>
+          <div className="text-sm text-blue-700">
+            <p>Total problems in database: {debugInfo.total}</p>
+            <p>Pending problems: {debugInfo.pending}</p>
+            <p>Approved problems: {debugInfo.approved}</p>
+            <p>Problems fetched: {debugInfo.fetched}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Create/Edit Problem Tab */}
+      {activeTab === 'create' && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
-            <div className='grid md:grid-cols-2 gap-6'>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className='block text-sm font-medium text-slate-700 mb-2'>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Problem Title *
                 </label>
                 <input
-                  type='text'
-                  id='title'
+                  type="text"
+                  name="title"
                   value={formData.title}
-                  onChange={handleChange}
-                  className='w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='e.g., Two Sum'
+                  onChange={handleInputChange}
                   required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., Two Sum"
                 />
               </div>
 
-              <div className='grid grid-cols-2 gap-4'>
-                <div>
-                  <label className='block text-sm font-medium text-slate-700 mb-2'>
-                    Difficulty *
-                  </label>
-                  <select
-                    id='difficulty'
-                    value={formData.difficulty}
-                    onChange={handleChange}
-                    className='w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    required
-                  >
-                    {difficulties.map(diff => (
-                      <option key={diff} value={diff}>{diff}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-slate-700 mb-2'>
-                    Category *
-                  </label>
-                  <select
-                    id='category'
-                    value={formData.category}
-                    onChange={handleChange}
-                    className='w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    required
-                  >
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Difficulty *
+                </label>
+                <select
+                  name="difficulty"
+                  value={formData.difficulty}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="easy">Easy</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="difficult">Difficult</option>
+                </select>
               </div>
             </div>
 
-            {/* Problem Description */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rating (1-200) *
+                </label>
+                <input
+                  type="number"
+                  name="rating"
+                  value={formData.rating}
+                  onChange={handleInputChange}
+                  required
+                  min="1"
+                  max="200"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tags (comma-separated) *
+                </label>
+                <input
+                  type="text"
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., arrays, hash-table, two-pointers"
+                />
+              </div>
+            </div>
+
+            {/* Description */}
             <div>
-              <label className='block text-sm font-medium text-slate-700 mb-2'>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Problem Description *
               </label>
               <textarea
-                id='description'
+                name="description"
                 value={formData.description}
-                onChange={handleChange}
-                rows={6}
-                className='w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                placeholder='Describe the problem clearly with examples...'
+                onChange={handleInputChange}
                 required
+                rows="6"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Describe the problem statement, constraints, and any examples..."
               />
             </div>
 
-            {/* Input/Output Format */}
-            <div className='grid md:grid-cols-2 gap-6'>
-              <div>
-                <label className='block text-sm font-medium text-slate-700 mb-2'>
-                  Input Format *
-                </label>
-                <textarea
-                  id='inputFormat'
-                  value={formData.inputFormat}
-                  onChange={handleChange}
-                  rows={3}
-                  className='w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Describe the input format...'
-                  required
-                />
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-slate-700 mb-2'>
-                  Output Format *
-                </label>
-                <textarea
-                  id='outputFormat'
-                  value={formData.outputFormat}
-                  onChange={handleChange}
-                  rows={3}
-                  className='w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Describe the expected output format...'
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Constraints */}
+            {/* Default Code */}
             <div>
-              <label className='block text-sm font-medium text-slate-700 mb-2'>
-                Constraints *
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Default Code Template *
               </label>
               <textarea
-                id='constraints'
-                value={formData.constraints}
-                onChange={handleChange}
-                rows={3}
-                className='w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                placeholder='e.g., 1 ≤ n ≤ 10^5, 1 ≤ arr[i] ≤ 10^9'
+                name="defaultCode"
+                value={formData.defaultCode}
+                onChange={handleInputChange}
                 required
-              />
-            </div>
-
-            {/* Sample Input/Output */}
-            <div className='grid md:grid-cols-2 gap-6'>
-              <div>
-                <label className='block text-sm font-medium text-slate-700 mb-2'>
-                  Sample Input *
-                </label>
-                <textarea
-                  id='sampleInput'
-                  value={formData.sampleInput}
-                  onChange={handleChange}
-                  rows={4}
-                  className='w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Provide sample input...'
-                  required
-                />
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-slate-700 mb-2'>
-                  Sample Output *
-                </label>
-                <textarea
-                  id='sampleOutput'
-                  value={formData.sampleOutput}
-                  onChange={handleChange}
-                  rows={4}
-                  className='w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Expected output for sample input...'
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Explanation */}
-            <div>
-              <label className='block text-sm font-medium text-slate-700 mb-2'>
-                Explanation
-              </label>
-              <textarea
-                id='explanation'
-                value={formData.explanation}
-                onChange={handleChange}
-                rows={4}
-                className='w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                placeholder='Explain the sample case (optional)...'
+                rows="10"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                placeholder="Provide the default code template for users to start with..."
               />
             </div>
 
             {/* Test Cases */}
             <div>
-              <div className='flex justify-between items-center mb-4'>
-                <label className='block text-sm font-medium text-slate-700'>
-                  Additional Test Cases
+              <div className="flex justify-between items-center mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Test Cases *
                 </label>
                 <button
-                  type='button'
+                  type="button"
                   onClick={addTestCase}
-                  className='bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm'
+                  className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
+                  <Plus className="w-4 h-4" />
                   Add Test Case
                 </button>
               </div>
-
+              
               {formData.testCases.map((testCase, index) => (
-                <div key={index} className='border border-slate-200 rounded-lg p-4 mb-4'>
-                  <div className='flex justify-between items-center mb-3'>
-                    <h4 className='font-medium text-slate-700'>Test Case {index + 1}</h4>
+                <div key={index} className="border border-gray-200 rounded-lg p-4 mb-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="font-medium">Test Case {index + 1}</h4>
                     {formData.testCases.length > 1 && (
                       <button
-                        type='button'
+                        type="button"
                         onClick={() => removeTestCase(index)}
-                        className='text-red-600 hover:text-red-800 text-sm'
+                        className="text-red-600 hover:text-red-800"
                       >
-                        Remove
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
                   
-                  <div className='grid md:grid-cols-2 gap-4'>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className='block text-sm text-slate-600 mb-1'>Input</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Input
+                      </label>
                       <textarea
                         value={testCase.input}
                         onChange={(e) => handleTestCaseChange(index, 'input', e.target.value)}
-                        rows={3}
-                        className='w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500'
-                        placeholder='Test case input...'
+                        rows="3"
+                        className="w-full p-2 border border-gray-300 rounded-md font-mono text-sm"
+                        placeholder="Input for this test case..."
                       />
                     </div>
                     
                     <div>
-                      <label className='block text-sm text-slate-600 mb-1'>Expected Output</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Expected Output *
+                      </label>
                       <textarea
-                        value={testCase.output}
-                        onChange={(e) => handleTestCaseChange(index, 'output', e.target.value)}
-                        rows={3}
-                        className='w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500'
-                        placeholder='Expected output...'
+                        value={testCase.expectedOutput}
+                        onChange={(e) => handleTestCaseChange(index, 'expectedOutput', e.target.value)}
+                        rows="3"
+                        required
+                        className="w-full p-2 border border-gray-300 rounded-md font-mono text-sm"
+                        placeholder="Expected output for this test case..."
                       />
                     </div>
                   </div>
@@ -380,23 +540,143 @@ export default function Contribute() {
               ))}
             </div>
 
-            {/* Submit Button */}
-            <div className='flex justify-center'>
+            {/* Submit Buttons */}
+            <div className="flex gap-4">
               <button
-                type='submit'
+                type="submit"
                 disabled={loading}
-                className={`px-8 py-3 rounded-lg font-medium ${
-                  loading
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                } text-white transition duration-200`}
+                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Submitting...' : 'Submit Problem'}
+                {loading ? 'Submitting...' : (editingProblem ? 'Update Problem' : 'Submit Problem')}
               </button>
+              
+              {editingProblem && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel Edit
+                </button>
+              )}
             </div>
           </form>
         </div>
-      </div>
+      )}
+
+      {/* Admin Manage Problems Tab */}
+      {activeTab === 'manage' && currentUser?.role === 'admin' && (
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          {/* Add refresh button */}
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="text-lg font-medium text-gray-900">All Problems</h2>
+            <div className="flex gap-2">
+              <button
+                onClick={handleRefreshProblems}
+                disabled={fetchLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm disabled:opacity-50"
+              >
+                {fetchLoading ? 'Loading...' : 'Refresh List'}
+              </button>
+            </div>
+          </div>
+          
+          {fetchLoading ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-2 text-gray-600">Loading problems...</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Title
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Difficulty
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Created By
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {allProblems.map((problem) => (
+                    <tr key={problem._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{problem.title}</div>
+                        <div className="text-sm text-gray-500">Rating: {problem.rating}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          problem.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
+                          problem.difficulty === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          problem.isApproved ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {problem.isApproved ? 'Approved' : 'Pending'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {problem.createdBy?.username || 'Unknown'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(problem)}
+                            className="text-blue-600 hover:text-blue-900"
+                            title="Edit Problem"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          
+                          {!problem.isApproved && (
+                            <button
+                              onClick={() => handleApprove(problem._id)}
+                              className="text-green-600 hover:text-green-900"
+                              title="Approve Problem"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                          )}
+                          
+                          <button
+                            onClick={() => handleDelete(problem._id)}
+                            className="text-red-600 hover:text-red-900"
+                            title="Delete Problem"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          
+          {!fetchLoading && allProblems.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No problems found. Start by creating your first problem!
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

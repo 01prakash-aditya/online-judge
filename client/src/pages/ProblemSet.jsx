@@ -5,77 +5,33 @@ export default function ProblemSet() {
   const navigate = useNavigate();
   const [filterDifficulty, setFilterDifficulty] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [problems, setProblems] = useState([]);
   const [filteredProblems, setFilteredProblems] = useState([]);
-  
-  const problems = [
-    {
-      id: 1,
-      title: "Hello World",
-      description: "Write a program that prints 'Hello World' to the console.",
-      difficulty: "easy",
-      rating: 50,
-      tags: ["basics", "output"],
-      defaultCode: '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your code here\n    return 0;\n}',
-      testCases: [
-        { input: '', expectedOutput: 'Hello World' }
-      ]
-    },
-    {
-      id: 2,
-      title: "Sum of Two Numbers",
-      description: "Given two integers as input, print their sum.",
-      difficulty: "easy",
-      rating: 50,
-      tags: ["math", "basics"],
-      defaultCode: '#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    // Write your code here\n    return 0;\n}',
-      testCases: [
-        { input: '5 7', expectedOutput: '12' },
-        { input: '10 -3', expectedOutput: '7' }
-      ]
-    },
-    {
-      id: 3,
-      title: "Palindrome Check",
-      description: "Given a string, determine if it is a palindrome, considering only alphanumeric characters and ignoring case sensitivity.",
-      difficulty: "moderate",
-      rating: 100,
-      tags: ["strings", "algorithms"],
-      defaultCode: '#include <iostream>\n#include <string>\nusing namespace std;\n\nbool isPalindrome(string s) {\n    // Write your code here\n    return false;\n}\n\nint main() {\n    string s;\n    getline(cin, s);\n    if(isPalindrome(s))\n        cout << "true" << endl;\n    else\n        cout << "false" << endl;\n    return 0;\n}',
-      testCases: [
-        { input: 'A man, a plan, a canal: Panama', expectedOutput: 'true' },
-        { input: 'race a car', expectedOutput: 'false' }
-      ]
-    },
-    {
-      id: 4,
-      title: "Fibonacci Number",
-      description: "Calculate the nth Fibonacci number. The Fibonacci sequence is defined as: F(0) = 0, F(1) = 1, and F(n) = F(n-1) + F(n-2) for n > 1.",
-      difficulty: "moderate",
-      rating: 100,
-      tags: ["math", "recursion", "dynamic programming"],
-      defaultCode: '#include <iostream>\nusing namespace std;\n\nint fibonacci(int n) {\n    // Write your code here\n    return 0;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    cout << fibonacci(n) << endl;\n    return 0;\n}',
-      testCases: [
-        { input: '2', expectedOutput: '1' },
-        { input: '5', expectedOutput: '5' },
-        { input: '10', expectedOutput: '55' }
-      ]
-    },
-    {
-      id: 5,
-      title: "Merge K Sorted Arrays",
-      description: "Given K sorted arrays, merge them into a single sorted array.",
-      difficulty: "difficult",
-      rating: 150,
-      tags: ["arrays", "heap", "divide and conquer"],
-      defaultCode: '#include <iostream>\n#include <vector>\n#include <queue>\nusing namespace std;\n\nvector<int> mergeKSortedArrays(vector<vector<int>>& arrays) {\n    // Write your code here\n    vector<int> result;\n    return result;\n}\n\nint main() {\n    int k;\n    cin >> k;\n    vector<vector<int>> arrays(k);\n    \n    for(int i = 0; i < k; i++) {\n        int size;\n        cin >> size;\n        arrays[i].resize(size);\n        for(int j = 0; j < size; j++) {\n            cin >> arrays[i][j];\n        }\n    }\n    \n    vector<int> result = mergeKSortedArrays(arrays);\n    for(int num : result) {\n        cout << num << " ";\n    }\n    cout << endl;\n    return 0;\n}',
-      testCases: [
-        { 
-          input: '3\n3\n1 4 5\n2\n1 3\n2\n2 6', 
-          expectedOutput: '1 1 2 3 4 5 6' 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProblems = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/problems/approved');
+        const data = await response.json();
+        
+        if (data.success) {
+          setProblems(data.problems);
+        } else {
+          setError('Failed to fetch problems');
         }
-      ]
-    }
-  ];
+      } catch (err) {
+        setError('Error connecting to server');
+        console.error('Error fetching problems:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProblems();
+  }, []);
 
   useEffect(() => {
     let filtered = [...problems];
@@ -94,10 +50,21 @@ export default function ProblemSet() {
     }
     
     setFilteredProblems(filtered);
-  }, [filterDifficulty, searchQuery]);
+  }, [problems, filterDifficulty, searchQuery]);
 
   const handleProblemClick = (problem) => {
-    localStorage.setItem('selectedProblem', JSON.stringify(problem));
+    const problemData = {
+      id: problem._id,
+      title: problem.title,
+      description: problem.description,
+      difficulty: problem.difficulty,
+      rating: problem.rating,
+      tags: problem.tags,
+      defaultCode: problem.defaultCode,
+      testCases: problem.testCases
+    };
+    
+    localStorage.setItem('selectedProblem', JSON.stringify(problemData));
     navigate('/compiler');
   };
   
@@ -114,6 +81,38 @@ export default function ProblemSet() {
     }
   };
 
+  const getDifficultyCount = (difficulty) => {
+    return problems.filter(p => p.difficulty === difficulty).length;
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto p-4">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-lg text-gray-600">Loading problems...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <div className="text-red-600 text-lg font-medium mb-2">Error Loading Problems</div>
+          <div className="text-red-500">{error}</div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6 text-center text-slate-800">Problem Set</h1>
@@ -126,25 +125,25 @@ export default function ProblemSet() {
               onClick={() => setFilterDifficulty('all')}
               className={`px-4 py-2 rounded-md ${filterDifficulty === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
             >
-              All
+              All ({problems.length})
             </button>
             <button 
               onClick={() => setFilterDifficulty('easy')}
               className={`px-4 py-2 rounded-md ${filterDifficulty === 'easy' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
             >
-              Easy (50)
+              Easy ({getDifficultyCount('easy')})
             </button>
             <button 
               onClick={() => setFilterDifficulty('moderate')}
               className={`px-4 py-2 rounded-md ${filterDifficulty === 'moderate' ? 'bg-yellow-600 text-white' : 'bg-gray-200'}`}
             >
-              Moderate (100)
+              Moderate ({getDifficultyCount('moderate')})
             </button>
             <button 
               onClick={() => setFilterDifficulty('difficult')}
               className={`px-4 py-2 rounded-md ${filterDifficulty === 'difficult' ? 'bg-red-600 text-white' : 'bg-gray-200'}`}
             >
-              Difficult (150)
+              Difficult ({getDifficultyCount('difficult')})
             </button>
           </div>
           
@@ -165,7 +164,7 @@ export default function ProblemSet() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Difficulty</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
@@ -173,14 +172,16 @@ export default function ProblemSet() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredProblems.map((problem) => (
-              <tr key={problem.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{problem.id}</td>
+            {filteredProblems.map((problem, index) => (
+              <tr key={problem._id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {index + 1}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="font-medium text-gray-900">{problem.title}</div>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {problem.tags.map((tag, index) => (
-                      <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                    {problem.tags.map((tag, tagIndex) => (
+                      <span key={tagIndex} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                         {tag}
                       </span>
                     ))}
@@ -206,17 +207,20 @@ export default function ProblemSet() {
         </table>
       </div>
       
-      {filteredProblems.length === 0 && (
+      {filteredProblems.length === 0 && !loading && (
         <div className="text-center p-8 text-gray-500">
-          No problems match your filters. Try adjusting your search criteria.
+          {problems.length === 0 
+            ? "No problems available yet. Check back later!" 
+            : "No problems match your filters. Try adjusting your search criteria."
+          }
         </div>
       )}
       
-      {/* Problem Examples Section */}
-      <div className="mt-10">
-        <h2 className="text-2xl font-semibold mb-4 text-slate-800">Featured Problem</h2>
-        
-        {filteredProblems.length > 0 && (
+      {/* Featured Problem Section */}
+      {filteredProblems.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold mb-4 text-slate-800">Featured Problem</h2>
+          
           <div className="bg-white p-5 rounded-lg shadow">
             <div className="flex justify-between items-start mb-4">
               <div>
@@ -239,27 +243,33 @@ export default function ProblemSet() {
             <div className="prose max-w-none">
               <p className="mb-4">{filteredProblems[0].description}</p>
               
-              <div className="mt-6">
-                <h4 className="text-lg font-medium mb-2">Example Test Cases:</h4>
-                <div className="grid gap-4 mb-4">
-                  {filteredProblems[0].testCases.map((testCase, index) => (
-                    <div key={index} className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Input:</p>
-                        <pre className="bg-gray-100 p-3 rounded text-sm overflow-x-auto">{testCase.input || '(Empty)'}</pre>
+              {filteredProblems[0].testCases && filteredProblems[0].testCases.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="text-lg font-medium mb-2">Example Test Cases:</h4>
+                  <div className="grid gap-4 mb-4">
+                    {filteredProblems[0].testCases.slice(0, 2).map((testCase, index) => (
+                      <div key={index} className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-1">Input:</p>
+                          <pre className="bg-gray-100 p-3 rounded text-sm overflow-x-auto">
+                            {testCase.input || '(Empty)'}
+                          </pre>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-1">Expected Output:</p>
+                          <pre className="bg-gray-100 p-3 rounded text-sm overflow-x-auto">
+                            {testCase.expectedOutput}
+                          </pre>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Expected Output:</p>
-                        <pre className="bg-gray-100 p-3 rounded text-sm overflow-x-auto">{testCase.expectedOutput}</pre>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
