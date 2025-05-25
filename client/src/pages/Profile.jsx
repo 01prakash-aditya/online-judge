@@ -89,7 +89,7 @@ export default function Profile() {
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
       
       {/* User Stats Section */}
-      <div className="mb-6 bg-slate-50 rounded-lg p-4 shadow-sm">
+      <div className="mb-6 bg-blue-100 rounded-lg p-4 shadow-sm">
         <h2 className="text-xl font-semibold mb-3 text-slate-800">User Statistics</h2>
         <div className="flex flex-col md:flex-row md:justify-around gap-4">
           <div className="flex flex-col items-center p-3 bg-white rounded-lg shadow-sm">
