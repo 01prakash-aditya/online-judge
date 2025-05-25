@@ -5,64 +5,70 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true
   },
   email: {
     type: String,
     required: true,
     unique: true,
-    lowercase: true,
-    trim: true
   },
   password: {
     type: String,
-    required: true
-  },
-  fullName: {
-    type: String,
     required: true,
-    trim: true
-  },
-  dob: {
-    type: Date,
-    required: true
-  },
-  registeredAt: {
-    type: Date,
-    default: Date.now
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
   },
   profilePicture: {
     type: String,
-    default: 'https://www.pngmart.com/files/23/Profile-PNG-Photo.png',
+    default: "https://tableconvert.com/images/avatar.png",
+  },
+  fullName: {
+    type: String,
+    default: "",
+  },
+  dob: {
+    type: Date,
+    default: null,
   },
   bio: {
     type: String,
-    default: ''
+    default: "",
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
   },
   rating: {
     type: Number,
-    default: 0
+    default: 0,
   },
   questionCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
-  solvedProblems: [{
-    problemId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Problem',
-      required: true
-    },
-    solvedAt: {
-      type: Date,
-      default: Date.now
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'moderator'],
+    default: 'user',
+  },
+  solvedProblems: [
+    {
+      problemId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Problem',
+      },
+      solvedAt: {
+        type: Date,
+        default: Date.now,
+      },
     }
-  }]
+  ],
+}, { 
+  timestamps: true,
+  indexes: [
+    { username: 1 }, 
+    { email: 1 },    
+    { rating: -1 },  
+    { isActive: 1, rating: -1 },
+    { role: 1 } 
+  ]
 });
 
 const User = mongoose.model('User', userSchema);

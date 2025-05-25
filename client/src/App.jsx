@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Compiler from "./pages/Compiler";
 import ProblemSet from "./pages/ProblemSet";
 import Contribute from "./pages/Contribute";
+import Community from "./pages/Community";
 import PrivateRoute from "./components/PrivateRoute";
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/compiler" element={<Compiler/>} />
         <Route path="/problemset" element={<ProblemSet/>} />
         <Route path="/contribute" element={<Contribute/>} />
+        <Route path="/community" element={<Community/>} />
         <Route element = {<PrivateRoute/>}>
           <Route path="/profile" element={<Profile/>} />
         </Route>

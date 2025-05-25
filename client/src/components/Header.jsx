@@ -28,6 +28,11 @@ export default function Header() {
             </Link>
           </li>
           <li>
+            <Link className="hover:text-blue-500" to="/community">
+              Community
+            </Link>
+          </li>
+          <li>
             <Link className="hover:text-blue-500" to="/about">
               About
             </Link>

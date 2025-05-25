@@ -13,26 +13,43 @@ export const updateUser = async (req, res, next) => {
   if (req.user.id !== req.params.id) {
     return next(errorHandler(401, 'You can update only your account!'));
   }
+  
   try {
-    if (req.body.password) {
-      req.body.password = bcryptjs.hashSync(req.body.password, 10);
+    const updateFields = {};
+    
+    if (req.body.username !== undefined) {
+      updateFields.username = req.body.username;
+    }
+    if (req.body.email !== undefined) {
+      updateFields.email = req.body.email;
+    }
+    if (req.body.profilePicture !== undefined) {
+      updateFields.profilePicture = req.body.profilePicture;
+    }
+    if (req.body.fullName !== undefined) {
+      updateFields.fullName = req.body.fullName;
+    }
+    if (req.body.dob !== undefined) {
+      updateFields.dob = req.body.dob;
+    }
+    if (req.body.bio !== undefined) {
+      updateFields.bio = req.body.bio;
+    }
+    
+    if (req.body.password && req.body.password.trim() !== '') {
+      updateFields.password = bcryptjs.hashSync(req.body.password, 10);
     }
 
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
-      {
-        $set: {
-          username: req.body.username,
-          email: req.body.email,
-          password: req.body.password,
-          profilePicture: req.body.profilePicture,
-          fullName: req.body.fullName,
-          dob: req.body.dob,
-          bio: req.body.bio,
-        },
-      },
+      { $set: updateFields },
       { new: true }
     );
+
+    if (!updatedUser) {
+      return next(errorHandler(404, 'User not found'));
+    }
+
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
   } catch (error) {

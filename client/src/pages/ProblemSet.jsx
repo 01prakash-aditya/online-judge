@@ -145,7 +145,7 @@ export default function ProblemSet() {
       <h1 className="text-3xl font-bold mb-6 text-center text-slate-800">Problem Set</h1>
       
       {/* Filters and Search */}
-      <div className="bg-slate-50 p-4 rounded-lg mb-6 shadow-sm">
+      <div className="bg-blue-100 p-4 rounded-lg mb-6 shadow-sm">
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <button 

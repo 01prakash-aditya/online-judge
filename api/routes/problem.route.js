@@ -1,12 +1,11 @@
 import express from 'express';
-import jwt from 'jsonwebtoken'; // Add this missing import
+import jwt from 'jsonwebtoken';
 import {verifytoken} from '../utils/verifyUser.js';
 import Problem from '../models/problem.model.js';
 import { errorHandler } from '../utils/error.js';
 
 const router = express.Router();
 
-// Enhanced debug middleware for admin routes
 const debugMiddleware = (req, res, next) => {
   console.log('=== REQUEST DEBUG INFO ===');
   console.log('Headers:', {

@@ -177,7 +177,7 @@ export default function ContributePage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          
+          // Add explicit authorization header if available
           ...(currentUser?.token && { 'Authorization': `Bearer ${currentUser.token}` })
         },
         credentials: 'include',
@@ -279,6 +279,7 @@ export default function ContributePage() {
       console.log('User ID:', currentUser?.id);
       console.log('Document Cookies:', document.cookie);
       
+      // Test a simple authenticated request
       const testRes = await fetch('/api/user/test', {
         credentials: 'include',
         headers: {

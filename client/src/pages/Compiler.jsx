@@ -26,7 +26,7 @@ export default function Compiler() {
   const location = useLocation();
 
   const sampleProblems = [
-    // sample problems
+    // existing sample problems 
   ];
 
   useEffect(() => {
@@ -301,7 +301,7 @@ export default function Compiler() {
       <h1 className="text-3xl font-semibold text-center my-5">Online Compiler</h1>
       
       {/* Problem selection & controls */}
-      <div className="bg-slate-50 rounded-lg p-4 shadow-sm mb-6">
+      <div className="bg-blue-100 rounded-lg p-4 shadow-sm mb-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div>
@@ -366,7 +366,7 @@ export default function Compiler() {
               className="bg-white border border-gray-300 rounded-md p-2 w-full md:w-60"
             >
               <option value="0">Free Coding (No Problem)</option>
-              {/* problem options here */}
+              {/*problem options here */}
             </select>
           </div>
         </div>
