@@ -51,7 +51,18 @@ const userSchema = new mongoose.Schema({
   questionCount: {
     type: Number,
     default: 0
-  }
+  },
+  solvedProblems: [{
+    problemId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Problem',
+      required: true
+    },
+    solvedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 });
 
 const User = mongoose.model('User', userSchema);

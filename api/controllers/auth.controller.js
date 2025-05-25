@@ -28,8 +28,7 @@ export const signin = async (req, res, next) => {
     if (!validUser) return next(errorHandler(404, 'User not found'));
     const validPassword = bcryptjs.compareSync(password, validUser.password);
     if (!validPassword) return next(errorHandler(401, 'wrong credentials'));
-    
-    // Include role in JWT token
+  
     const token = jwt.sign({ 
       id: validUser._id, 
       role: validUser.role 
@@ -50,7 +49,6 @@ export const google = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (user) {
-      // Include role in JWT token
       const token = jwt.sign({ 
         id: user._id, 
         role: user.role 
@@ -87,14 +85,13 @@ export const google = async (req, res, next) => {
       
       await newUser.save();
       
-      // Include role in JWT token
       const token = jwt.sign({ 
         id: newUser._id, 
         role: newUser.role 
       }, process.env.JWT_SECRET);
       
       const { password: hashedPassword2, ...rest } = newUser._doc;
-      const expiryDate = new Date(Date.now() + 3600000); // 1 hour
+      const expiryDate = new Date(Date.now() + 3600000); 
       res
         .cookie('access_token', token, {
           httpOnly: true,

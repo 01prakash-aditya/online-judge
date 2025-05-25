@@ -24,7 +24,6 @@ const debugMiddleware = (req, res, next) => {
   next();
 };
 
-// Admin verification middleware
 const verifyAdmin = (req, res, next) => {
   console.log('=== ADMIN VERIFICATION ===');
   console.log('User role:', req.user?.role);
@@ -90,7 +89,6 @@ router.post('/create', verifytoken, async (req, res, next) => {
   }
 });
 
-// Get all approved problems
 router.get('/approved', async (req, res, next) => {
   try {
     const { difficulty, search } = req.query;
@@ -121,7 +119,6 @@ router.get('/approved', async (req, res, next) => {
   }
 });
 
-// Enhanced /all route with proper admin verification
 router.get('/all', verifytoken, verifyAdmin, async (req, res, next) => {
   try {
     console.log('=== FETCHING ALL PROBLEMS FOR ADMIN ===');
@@ -164,7 +161,6 @@ router.get('/all', verifytoken, verifyAdmin, async (req, res, next) => {
   }
 });
 
-// Route to test authentication and admin status
 router.get('/auth-test', verifytoken, (req, res) => {
   res.json({
     success: true,
