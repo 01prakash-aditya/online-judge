@@ -26,7 +26,7 @@ export default function Compiler() {
   const location = useLocation();
 
   const sampleProblems = [
-    // existing sample problems 
+    // Your existing sample problems here
   ];
 
   useEffect(() => {
@@ -366,7 +366,7 @@ export default function Compiler() {
               className="bg-white border border-gray-300 rounded-md p-2 w-full md:w-60"
             >
               <option value="0">Free Coding (No Problem)</option>
-              {/*problem options here */}
+              {/* Add your problem options here */}
             </select>
           </div>
         </div>
@@ -480,7 +480,7 @@ export default function Compiler() {
       {/* Code Editor and Input/Output */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Code Editor */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-white rounded-lg shadow-sm ">
           <div className="bg-gray-50 px-4 py-3 border-b rounded-t-lg">
             <h3 className="font-semibold text-gray-800">Code Editor</h3>
           </div>
@@ -489,7 +489,7 @@ export default function Compiler() {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               onKeyDown={handleKeyDown}
-              className={`w-full h-96 p-4 border border-gray-300 rounded-lg font-mono resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`w-full h-96 p-4 rounded-lg font-mono resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                 theme === 'dark' 
                   ? 'bg-gray-900 text-green-400 border-gray-700' 
                   : 'bg-white text-gray-900'
@@ -504,7 +504,7 @@ export default function Compiler() {
         {/* Input/Output */}
         <div className="space-y-6">
           {/* Input Section */}
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="bg-white rounded-lg shadow-sm">
             <div className="bg-gray-50 px-4 py-3 border-b rounded-t-lg flex items-center justify-between">
               <h3 className="font-semibold text-gray-800">Input</h3>
               {selectedProblem && selectedProblem.testCases && selectedProblem.testCases.length > 1 && (
@@ -536,7 +536,7 @@ export default function Compiler() {
           </div>
 
           {/* Output Section */}
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="bg-white rounded-lg shadow-sm">
             <div className="bg-gray-50 px-4 py-3 border-b rounded-t-lg">
               <h3 className="font-semibold text-gray-800">Output</h3>
             </div>
@@ -581,7 +581,7 @@ export default function Compiler() {
       )}
 
       {/* Keyboard Shortcuts Help */}
-      <div className="bg-gray-50 rounded-lg p-4 border">
+      <div className="bg-gray-50 rounded-lg p-4">
         <h3 className="font-semibold text-gray-800 mb-3">Keyboard Shortcuts</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div className="flex justify-between">
