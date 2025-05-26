@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
+dotenv.config();
 
-config();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 
@@ -12,4 +12,3 @@ export const aiCodeReview = async (code) => {
     });
     return response.text;
 };
-

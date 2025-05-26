@@ -11,6 +11,8 @@ export default defineConfig({
     include: ['@reduxjs/toolkit'],
   },
   server: {
+    host: true, // or '0.0.0.0'
+    port: 5173,
     proxy: {
       '/api': {
         target: apiTarget,

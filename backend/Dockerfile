@@ -7,10 +7,10 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 
-RUN npm install -g nodemon && npm install
+RUN npm install
 
 COPY . .
 
 EXPOSE 8000
-CMD ["npx", "nodemon", "index.js"]
+CMD ["node", "index.js"]
 
