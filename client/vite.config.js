@@ -2,21 +2,21 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
+const isDocker = process.env.IS_DOCKER === 'true'
+const apiTarget = isDocker ? 'http://api:3000' : 'http://localhost:3000'
+
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [react(), tailwindcss()],
   optimizeDeps: {
     include: ['@reduxjs/toolkit'],
   },
-    server:{
-      proxy: {
-        '/api': {
-          target: 'http://localhost:3000',
-          secure: false,
-        },
+  server: {
+    proxy: {
+      '/api': {
+        target: apiTarget,
+        changeOrigin: true,
+        secure: false,
       },
     },
-});
+  },
+})

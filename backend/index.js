@@ -3,8 +3,8 @@ const app = express();
 import cors from 'cors';
 import { generateFile } from './generateFile.js';
 import { executeCpp } from './executeCpp.js';
+import { aiCodeReview } from './aiCodeReview.js';
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -43,6 +43,20 @@ app.post('/run', async (req, res) => {
     }
 });
 
+app.post("/ai-review", async (req, res) => {
+    const { language = 'cpp', code, input = '' } = req.body;
+    if (code === undefined) {
+        return res.status(404).json({ success: false, error: "Empty code!" });
+    }
+    try {
+        const review = await aiCodeReview(code);
+        res.json({ "review": review });
+        console.log("review:", review);
+    } catch (error) {
+        res.status(500).json({ error: "Error in AI review, error: " + error.message });
+    }
+});
+
 app.get('/', (req, res) => {
     res.json({
         message: 'Hello, World!',
@@ -50,6 +64,6 @@ app.get('/', (req, res) => {
     });
 });
 
-app.listen(8000, () => {
+app.listen(process.env.PORT || 8000, () => {
   console.log('Server is running on port 8000');
 });

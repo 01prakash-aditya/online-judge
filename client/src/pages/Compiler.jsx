@@ -13,6 +13,9 @@ export default function Compiler() {
   const [isCompiling, setIsCompiling] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTestingAllCases, setIsTestingAllCases] = useState(false);
+  const [isReviewingCode, setIsReviewingCode] = useState(false);
+  const [aiReview, setAiReview] = useState('');
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [theme, setTheme] = useState('light');
   const [fontSize, setFontSize] = useState('16px');
   const [language, setLanguage] = useState('cpp');
@@ -168,6 +171,45 @@ export default function Compiler() {
     }
   };
 
+  const handleAIReview = async () => {
+    if (!code.trim()) {
+      setStatusMessage('Please write some code before requesting a review');
+      return;
+    }
+
+    setIsReviewingCode(true);
+    setStatusMessage('Getting AI review...');
+    
+    try {
+      const response = await fetch('http://localhost:8000/ai-review', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          language: language,
+          code: code,
+          input: input
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok && data.review) {
+        setAiReview(data.review);
+        setStatusMessage('AI review completed successfully');
+      } else {
+        setStatusMessage(`AI review failed: ${data.error || 'Unknown error'}`);
+      }
+
+    } catch (error) {
+      setStatusMessage(`AI review error: ${error.message}`);
+      console.error('AI Review Error:', error);
+    } finally {
+      setIsReviewingCode(false);
+    }
+  };
+
   const handleTestAllCases = async () => {
     if (!selectedProblem || !selectedProblem.testCases || selectedProblem.testCases.length === 0) {
       return;
@@ -296,6 +338,15 @@ export default function Compiler() {
     setAllTestsPassed(false);
   }, [code]);
 
+  // Function to format AI review text with proper headings
+  const formatAIReview = (reviewText) => {
+    if (!reviewText) return '';
+    
+    return reviewText
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+  };
+
   return (
     <div className="p-3 max-w-6xl mx-auto">
       <h1 className="text-3xl font-semibold text-center my-5">Online Compiler</h1>
@@ -375,10 +426,30 @@ export default function Compiler() {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handleCompile}
-            disabled={isCompiling || isTestingAllCases || isSubmitting}
+            disabled={isCompiling || isTestingAllCases || isSubmitting || isReviewingCode}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-4 py-2 rounded-lg font-medium transition-colors"
           >
             {isCompiling ? 'Compiling...' : 'Run Code (Ctrl+Enter)'}
+          </button>
+
+          <button
+            onClick={handleAIReview}
+            disabled={isCompiling || isTestingAllCases || isSubmitting || isReviewingCode}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            {isReviewingCode ? (
+              <>
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Reviewing...
+              </>
+            ) : (
+              <>
+                🤖 AI Review
+              </>
+            )}
           </button>
 
           {selectedProblem && selectedProblem.testCases && (
@@ -386,7 +457,7 @@ export default function Compiler() {
               {!allTestsPassed ? (
                 <button
                   onClick={handleTestAllCases}
-                  disabled={isCompiling || isTestingAllCases || isSubmitting}
+                  disabled={isCompiling || isTestingAllCases || isSubmitting || isReviewingCode}
                   className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                   {isTestingAllCases ? 'Testing All Cases...' : 'Test All Cases'}
@@ -394,7 +465,7 @@ export default function Compiler() {
               ) : (
                 <button
                   onClick={handleSubmitSolution}
-                  disabled={isCompiling || isTestingAllCases || isSubmitting || isProblemSolved}
+                  disabled={isCompiling || isTestingAllCases || isSubmitting || isProblemSolved || isReviewingCode}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     isProblemSolved 
                       ? 'bg-gray-400 text-white cursor-not-allowed' 
@@ -576,6 +647,30 @@ export default function Compiler() {
                 <span className="font-mono ml-2 text-green-600">{memoryUsage}KB</span>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* AI Review Section */}
+      {aiReview && (
+        <div className="bg-white rounded-lg shadow-sm border mb-6">
+          <div className="bg-indigo-50 px-4 py-3 border-b rounded-t-lg flex items-center gap-2">
+            <span className="text-xl">🤖</span>
+            <h3 className="font-semibold text-indigo-800">AI Code Review</h3>
+            <button
+              onClick={() => setAiReview('')}
+              className="ml-auto text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+            >
+              Clear Review
+            </button>
+          </div>
+          <div className="p-6">
+            <div 
+              className="prose max-w-none text-sm text-gray-700 leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: formatAIReview(aiReview)
+              }}
+            />
           </div>
         </div>
       )}
