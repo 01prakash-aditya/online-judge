@@ -42,21 +42,125 @@
 
 ---
 
-## Installation Guide
+## Installation and Setup
 
-**Cloning the project**
-`git clone https://github.com/01prakash-aditya/online-judge`
+### Prerequisites
 
-**Backend**
-`npm run dev`
+- **Node.js** (v14 or higher)
+- **npm** or **yarn**
+- **C++ compiler** installed on your system
 
-**Frontend**
-`cd client`
-`npm run dev`
+---
 
-**Compiler and AI code reviewer**
-`cd backend`
-`npx nodemon index.js`
+### Compiler & AI review Setup
+
+1. Navigate to the backend directory:
+
+    ```bash
+    cd backend
+    ```
+
+2. Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+3. Create a `.env` file with the following variables:
+
+    ```env
+    PORT=8000
+    GOOGLE_API_KEY=your_google_api_key
+    ```
+
+4. Start the server:
+
+    ```bash
+    npx nodemon index.js
+    ```
+
+---
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+
+    ```bash
+    cd client
+    ```
+
+2. Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+3. Start the development server:
+
+    ```bash
+    npm run dev
+    ```
+
+4. Open your browser and go to:  
+   [http://localhost:5173](http://localhost:5173) *(or the port shown in your terminal)*
+
+---
+
+### Backend Setup
+
+1. Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+2. Start the development server:
+
+    ```bash
+    npm run dev
+    ```
+
+---
+
+## 📡 API Endpoints
+
+- `GET /` – Health check endpoint  
+- `POST /run` – Execute code with input  
+  **Body:**
+  ```json
+  {
+    "language": "cpp",
+    "code": "string",
+    "input": "string"
+  }
+  ```
+
+- `POST /ai-review` – Get AI feedback on code  
+  **Body:**
+  ```json
+  {
+    "code": "string"
+  }
+  ```
+
+---
+
+## 🐳 Docker Support
+
+The backend includes Docker configuration for containerized deployment.
+
+1. **Build the Docker image:**
+
+    ```bash
+    docker-compose up --build
+    ```
+
+2. **Run on PORT:**
+
+    ```bash
+    (http://localhost:5173)
+    ```
+
 
 --
 
