@@ -160,7 +160,11 @@ The backend includes Docker configuration for containerized deployment.
     ```bash
     (http://localhost:5173)
     ```
+3. **To stop the containers:**
 
+   ```bash
+   docker-compose down
+   ```
 
 --
 
