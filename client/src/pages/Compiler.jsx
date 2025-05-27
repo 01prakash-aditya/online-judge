@@ -7,7 +7,6 @@ import { updateUserSuccess } from '../redux/user/userSlice.js';
 export default function Compiler() {
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
-  const [code, setCode] = useState('#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, AlgoU!" << endl;\n    return 0;\n}');
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [isCompiling, setIsCompiling] = useState(false);
@@ -28,9 +27,40 @@ export default function Compiler() {
   const [solvedProblems, setSolvedProblems] = useState([]);
   const location = useLocation();
 
+  const defaultCodeTemplates = {
+    cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, AlgoU!" << endl;\n    return 0;\n}',
+    java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, AlgoU!");\n    }\n}',
+    python: 'print("Hello, AlgoU!")'
+  };
+
+  const [code, setCode] = useState(defaultCodeTemplates.cpp);
+
   const sampleProblems = [
-    // Your existing sample problems here
+    // sample
   ];
+
+  const handleLanguageChange = (newLanguage) => {
+    setLanguage(newLanguage);
+    
+    if (!selectedProblem) {
+      setCode(defaultCodeTemplates[newLanguage]);
+      setInput(''); 
+    } else {
+      const problemCode = selectedProblem.defaultCode && selectedProblem.defaultCode[newLanguage] 
+        ? selectedProblem.defaultCode[newLanguage]
+        : defaultCodeTemplates[newLanguage]; 
+      
+      setCode(problemCode);
+      
+      if (selectedProblem.testCases && selectedProblem.testCases.length > 0) {
+        setInput(selectedProblem.testCases[testCaseIndex].input);
+      }
+    }
+    
+    setOutput('');
+    setStatusMessage('');
+    setAllTestsPassed(false);
+  };
 
   useEffect(() => {
     const fetchSolvedProblems = async () => {
@@ -58,19 +88,36 @@ export default function Compiler() {
       try {
         const problem = JSON.parse(storedProblem);
         setSelectedProblem(problem);
-        setCode(problem.defaultCode);
+        
+        const problemCode = problem.defaultCode && problem.defaultCode[language] 
+          ? problem.defaultCode[language]
+          : defaultCodeTemplates[language];
+        
+        setCode(problemCode);
+        
         if (problem.testCases && problem.testCases.length > 0) {
           setInput(problem.testCases[0].input);
+          setTestCaseIndex(0);
         }
         setOutput('');
         setStatusMessage('');
         setAllTestsPassed(false);
-        localStorage.removeItem('selectedProblem');
+        localStorage.removeItem('selectedProblem'); // Clean up
       } catch (error) {
         console.error("Error parsing problem from localStorage:", error);
       }
     }
-  }, [location]);
+
+    // Check for problem passed via URL parameters
+    const urlParams = new URLSearchParams(location.search);
+    const problemId = urlParams.get('problemId');
+    if (problemId) {
+      const problem = getProblemById(parseInt(problemId));
+      if (problem) {
+        loadProblem(problem);
+      }
+    }
+  }, [location, language]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -89,7 +136,14 @@ export default function Compiler() {
 
   const loadProblem = (problem) => {
     setSelectedProblem(problem);
-    setCode(problem.defaultCode);
+    
+    // Always use problem's default code for the current language or fallback to basic template
+    const problemCode = problem.defaultCode && problem.defaultCode[language] 
+      ? problem.defaultCode[language]
+      : defaultCodeTemplates[language];
+    
+    setCode(problemCode);
+    
     if (problem.testCases && problem.testCases.length > 0) {
       setInput(problem.testCases[0].input);
       setTestCaseIndex(0);
@@ -105,11 +159,12 @@ export default function Compiler() {
       const start = e.target.selectionStart;
       const end = e.target.selectionEnd;
       
-      const newCode = code.substring(0, start) + '    ' + code.substring(end);
+      const indentation = language === 'python' ? '    ' : '    '; // 4 spaces for all languages
+      const newCode = code.substring(0, start) + indentation + code.substring(end);
       setCode(newCode);
       
       setTimeout(() => {
-        e.target.selectionStart = e.target.selectionEnd = start + 4;
+        e.target.selectionStart = e.target.selectionEnd = start + indentation.length;
       }, 0);
     }
   };
@@ -329,7 +384,7 @@ export default function Compiler() {
 
   const getProblemById = (id) => {
     const idNumber = parseInt(id);
-    return [...sampleProblems, ...(selectedProblem ? [selectedProblem] : [])].find(p => p.id === idNumber) || null;
+    return sampleProblems.find(p => p.id === idNumber) || null;
   };
 
   const isProblemSolved = selectedProblem && solvedProblems.includes(selectedProblem.id);
@@ -347,6 +402,16 @@ export default function Compiler() {
       .replace(/\n/g, '<br>');
   };
 
+  // Get language-specific syntax highlighting class
+  const getLanguageClass = () => {
+    switch(language) {
+      case 'java': return 'language-java';
+      case 'python': return 'language-python';
+      case 'cpp':
+      default: return 'language-cpp';
+    }
+  };
+
   return (
     <div className="p-3 max-w-6xl mx-auto">
       <h1 className="text-3xl font-semibold text-center my-5">Online Compiler</h1>
@@ -360,12 +425,12 @@ export default function Compiler() {
               <select
                 id="language"
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}
+                onChange={(e) => handleLanguageChange(e.target.value)}
                 className="bg-white border border-gray-300 rounded-md p-2 w-full md:w-40"
               >
                 <option value="cpp">C++</option>
-                <option value="java" disabled>Java (Coming soon)</option>
-                <option value="python" disabled>Python (Coming soon)</option>
+                <option value="java">Java</option>
+                <option value="python">Python</option>
               </select>
             </div>
             
@@ -405,7 +470,7 @@ export default function Compiler() {
                 const id = parseInt(e.target.value);
                 if (id === 0) {
                   setSelectedProblem(null);
-                  setCode('#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, AlgoU!" << endl;\n    return 0;\n}');
+                  setCode(defaultCodeTemplates[language]);
                   setInput('');
                   setAllTestsPassed(false);
                 } else {
@@ -417,7 +482,20 @@ export default function Compiler() {
               className="bg-white border border-gray-300 rounded-md p-2 w-full md:w-60"
             >
               <option value="0">Free Coding (No Problem)</option>
-              {/* Add your problem options here */}
+              {/* Show the selected problem in the dropdown */}
+              {selectedProblem && (
+                <option key={selectedProblem.id} value={selectedProblem.id}>
+                  {selectedProblem.title}
+                </option>
+              )}
+              {/* Show all available problems */}
+              {sampleProblems.map(problem => (
+                problem.id !== selectedProblem?.id && (
+                  <option key={problem.id} value={problem.id}>
+                    {problem.title}
+                  </option>
+                )
+              ))}
             </select>
           </div>
         </div>
@@ -479,6 +557,18 @@ export default function Compiler() {
           )}
         </div>
 
+        {/* Language indicator */}
+        <div className="mt-3 flex items-center gap-2">
+          <span className="text-sm text-gray-600">Current Language:</span>
+          <span className={`px-2 py-1 rounded text-xs font-medium ${
+            language === 'cpp' ? 'bg-blue-100 text-blue-800' :
+            language === 'java' ? 'bg-orange-100 text-orange-800' :
+            'bg-green-100 text-green-800'
+          }`}>
+            {language === 'cpp' ? 'C++' : language === 'java' ? 'Java' : 'Python'}
+          </span>
+        </div>
+
         {/* Status message */}
         {statusMessage && (
           <div className={`mt-3 p-3 rounded-lg text-sm ${
@@ -497,53 +587,40 @@ export default function Compiler() {
 
       {/* Problem Description */}
       {selectedProblem && (
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+        <div className={`rounded-lg shadow-sm border p-6 mb-6 ${
+          isProblemSolved 
+            ? 'bg-green-50 border-green-200' 
+            : 'bg-white'
+        }`}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">{selectedProblem.title}</h2>
+            <div className="flex items-center gap-4">
+              <h2 className={`text-2xl font-bold ${
+                isProblemSolved ? 'text-green-800' : 'text-gray-800'
+              }`}>{selectedProblem.title}</h2>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                selectedProblem.difficulty === 'easy' ? 'bg-green-500 text-white' :
+                selectedProblem.difficulty === 'moderate' ? 'bg-yellow-500 text-white' :
+                selectedProblem.difficulty === 'difficult' ? 'bg-red-500 text-white' :
+                'bg-red-500 text-white'
+              }`}>
+                {selectedProblem.difficulty}
+              </span>
+              <span className={`text-sm ${
+                isProblemSolved ? 'text-green-700' : 'text-gray-600'
+              }`}>Rating: {selectedProblem.rating}</span>
+            </div>
             {isProblemSolved && (
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium">
                 ✓ Solved
               </span>
             )}
           </div>
           
           <div className="prose max-w-none mb-6">
-            <p className="text-gray-700 leading-relaxed">{selectedProblem.description}</p>
+            <p className={`leading-relaxed ${
+              isProblemSolved ? 'text-green-800' : 'text-gray-700'
+            }`}>{selectedProblem.description}</p>
             
-            {selectedProblem.examples && selectedProblem.examples.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">Examples:</h3>
-                {selectedProblem.examples.map((example, idx) => (
-                  <div key={idx} className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <div className="mb-2">
-                      <strong className="text-gray-700">Input:</strong>
-                      <pre className="bg-white p-2 rounded border mt-1 text-sm">{example.input}</pre>
-                    </div>
-                    <div>
-                      <strong className="text-gray-700">Output:</strong>
-                      <pre className="bg-white p-2 rounded border mt-1 text-sm">{example.output}</pre>
-                    </div>
-                    {example.explanation && (
-                      <div className="mt-2">
-                        <strong className="text-gray-700">Explanation:</strong>
-                        <p className="text-gray-600 mt-1">{example.explanation}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {selectedProblem.constraints && (
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">Constraints:</h3>
-                <ul className="list-disc list-inside text-gray-700 space-y-1">
-                  {selectedProblem.constraints.map((constraint, idx) => (
-                    <li key={idx}>{constraint}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         </div>
       )}

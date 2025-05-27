@@ -3,6 +3,8 @@ const app = express();
 import cors from 'cors';
 import { generateFile } from './generateFile.js';
 import { executeCpp } from './executeCpp.js';
+import { executePy } from './executePy.js';
+import { executeJava } from './executeJava.js';
 import { aiCodeReview } from './aiCodeReview.js';
 
 app.use(express.json());
@@ -13,6 +15,23 @@ app.use(cors({
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+function getExecutor(language) {
+  const lang = language.toLowerCase();
+  switch (lang) {
+    case 'cpp':
+    case 'c++':
+      return executeCpp;
+    case 'python':
+    case 'python3':
+    case 'py':
+      return executePy;
+    case 'java':
+      return executeJava;
+    default:
+      throw new Error(`Unsupported language: ${language}`);
+  }
+}
 
 app.post('/run', async (req, res) => {
     const { language = 'cpp', code, input = '' } = req.body;
@@ -26,11 +45,14 @@ app.post('/run', async (req, res) => {
 
     try {
         const filePath = generateFile(language, code);
-        const output = await executeCpp(filePath, input);
+        const executor = getExecutor(language);
+        const output = await executor(filePath, input);
+        
         res.json({
             filePath,
             output,
             input: input || 'No input provided',
+            language,
             success: true
         });
     }
@@ -59,11 +81,13 @@ app.post("/ai-review", async (req, res) => {
 
 app.get('/', (req, res) => {
     res.json({
-        message: 'Hello, World!',
+        message: 'Multi-language Code Execution Server',
         status: 'success',
+        supportedLanguages: ['cpp', 'c++', 'python', 'python3', 'py', 'java']
     });
 });
 
 app.listen(process.env.PORT || 8000, () => {
   console.log('Server is running on port 8000');
+  console.log('Supported languages: C++, Python 3, Java');
 });
