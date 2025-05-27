@@ -48,7 +48,7 @@
 
 - **Node.js** (v14 or higher)
 - **npm** or **yarn**
-- **C++ compiler** installed on your system
+- **C++ compiler, Python3, Java jdk24** installed on your system
 
 ---
 
