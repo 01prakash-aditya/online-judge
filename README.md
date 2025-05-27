@@ -129,7 +129,7 @@
   **Body:**
   ```json
   {
-    "language": "cpp",
+    "language": "string",
     "code": "string",
     "input": "string"
   }
