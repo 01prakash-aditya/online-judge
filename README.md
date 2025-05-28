@@ -4,7 +4,7 @@
 
 ---
 
-![Home](proj_images/Screenshot 2025-05-28 092317.png)
+![Home](https://github.com/01prakash-aditya/online-judge/blob/e88b29a8e858b5856ab65424a2c79794997ad7e7/proj_images/Screenshot%202025-05-28%20092317.png)
 
 ---
 
