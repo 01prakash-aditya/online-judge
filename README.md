@@ -169,8 +169,35 @@ The backend includes Docker configuration for containerized deployment.
    ```bash
    docker-compose down
    ```
+---
 
---
+## Project Images 
+
+**Online Compiler**
+![Compiler](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092345.png)
+
+**AI Chat Assistant**
+![ChatBot](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092357.png)
+
+**Problem Set**
+![ProblemSet](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092418.png)
+
+**LeaderBoard**
+![Leaderboard](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092433.png)
+
+**Discussions**
+![Discussions](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092443.png)
+
+**Contribute Page**
+![Contribute](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092455.png)
+
+**Profile Page**
+![Profile](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092504.png)
+
+**SignUp Page**
+![SignUp](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20093024.png)
+
+---
 
 ## Future Enhancements
 
