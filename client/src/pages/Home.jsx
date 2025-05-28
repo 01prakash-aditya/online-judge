@@ -55,10 +55,10 @@ export default function Home() {
         
         <div className='bg-white p-5 rounded-lg shadow'>
           <h3 className='text-xl font-semibold mb-3 text-slate-800'>
-            <span className='text-orange-600 mr-2'>🏆</span>Contests
+            <span className='text-orange-600 mr-2'>🏆</span>Leaderboard
           </h3>
           <p className='text-slate-700'>
-            Participate in regular coding contests to test your skills against other programmers.
+            Solve problems from a diverse set of topics and earn ratings for each solution.
             Climb the leaderboard and track your progress over time with detailed statistics.
           </p>
         </div>
