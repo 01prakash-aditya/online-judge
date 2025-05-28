@@ -31,7 +31,9 @@
 
 ## Architecture Overview  
 AlgoU Online Judge follows the MVC (Model-View-Controller) architectural pattern to ensure clean separation of concerns and maintainable code structure.  
- 
+  
+![MVC](https://github.com/01prakash-aditya/online-judge/blob/7423f06cbc75a0ad3cda7ca53b27bbf452c18a1d/proj_images/Screenshot%202025-05-28%20152116.png)
+
 ---
   
 ## MVC Implementation  
@@ -132,13 +134,19 @@ Leaderboard View: Real-time rankings and statistics
     npm install
     ```
 
-3. Start the development server:
+3. Create a `.env` file with the following variables:
+
+    ```env
+    VITE_FIREBASE_API_KEY=your_firebase_api_key
+    ```
+
+4. Start the development server:
 
     ```bash
     npm run dev
     ```
 
-4. Open your browser and go to:  
+5. Open your browser and go to:  
    [http://localhost:5173](http://localhost:5173) *(or the port shown in your terminal)*
 
 ---
@@ -151,7 +159,14 @@ Leaderboard View: Real-time rankings and statistics
     npm install
     ```
 
-2. Start the development server:
+2. Create a `.env` file with the following variables:
+
+    ```env
+    MONGO=your_mongo_uri
+    JWT_SECRET='...'
+    ```
+
+3. Start the development server:
 
     ```bash
     npm run dev
