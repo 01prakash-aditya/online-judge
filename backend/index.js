@@ -6,6 +6,7 @@ import { executeCpp } from './executeCpp.js';
 import { executePy } from './executePy.js';
 import { executeJava } from './executeJava.js';
 import { aiCodeReview } from './aiCodeReview.js';
+import { chatBot } from './chatBot.js';
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -78,6 +79,24 @@ app.post("/ai-review", async (req, res) => {
         res.status(500).json({ error: "Error in AI review, error: " + error.message });
     }
 });
+
+app.post("/chat-bot", async (req, res) => {
+  const { message } = req.body;
+  if (!message) {
+    return res.status(400).json({ success: false, error: "Message is required" });
+  }
+  try {
+    const response = await chatBot(message);
+    res.json({ response });
+  } catch (error) {
+    console.error('Chat bot error:', error.message);
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+}
+);
 
 app.get('/', (req, res) => {
     res.json({

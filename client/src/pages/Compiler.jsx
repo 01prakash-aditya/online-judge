@@ -14,6 +14,7 @@ export default function Compiler() {
   const [isTestingAllCases, setIsTestingAllCases] = useState(false);
   const [isReviewingCode, setIsReviewingCode] = useState(false);
   const [aiReview, setAiReview] = useState('');
+  const [isChatting, setIsChatting] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [theme, setTheme] = useState('light');
   const [fontSize, setFontSize] = useState('16px');
@@ -25,6 +26,8 @@ export default function Compiler() {
   const [testCaseIndex, setTestCaseIndex] = useState(0);
   const [allTestsPassed, setAllTestsPassed] = useState(false);
   const [solvedProblems, setSolvedProblems] = useState([]);
+  const [chatPrompt, setChatPrompt] = useState('');
+  const [reviewType, setReviewType] = useState('code');
   const location = useLocation();
 
   const defaultCodeTemplates = {
@@ -262,6 +265,44 @@ export default function Compiler() {
       console.error('AI Review Error:', error);
     } finally {
       setIsReviewingCode(false);
+    }
+  };
+
+  const handleChatPrompt = async () => {
+    if (!chatPrompt.trim()) {
+      setStatusMessage('Please enter a prompt to chat with AI');
+      return;
+    }
+
+    setIsChatting(true);
+    setStatusMessage('Getting AI response...');
+    setReviewType('chat');
+    
+    try {
+      const response = await fetch('http://localhost:8000/chat-bot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: chatPrompt
+        })
+      });
+      const data = await response.json();
+      
+      if (response.ok && data.response) {
+        setAiReview(data.response);
+        setStatusMessage('AI response completed successfully');
+        setChatPrompt(''); 
+      } else {
+        setStatusMessage(`AI chat failed: ${data.error || 'Unknown error'}`);
+      }
+
+    } catch (error) {
+      setStatusMessage(`AI chat error: ${error.message}`);
+      console.error('AI Chat Error:', error);
+    } finally {
+      setIsChatting(false);
     }
   };
 
@@ -751,6 +792,50 @@ export default function Compiler() {
           </div>
         </div>
       )}
+
+      {/* Chat Bot Section */}
+      <div className="bg-white rounded-lg shadow-sm border mb-6">
+        <div className="bg-emerald-50 px-4 py-3 border-b rounded-t-lg flex items-center gap-2">
+          <span className="text-xl">💬</span>
+          <h3 className="font-semibold text-emerald-800">AI Chat Assistant</h3>
+        </div>
+        <div className="p-6">
+          <div className="mb-4">
+            <label htmlFor="chatPrompt" className="block text-sm font-medium text-gray-700 mb-2">
+              Ask AI anything about coding, algorithms, or get help with your solution:
+            </label>
+            <textarea
+              id="chatPrompt"
+              value={chatPrompt}
+              onChange={(e) => setChatPrompt(e.target.value)}
+              className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              placeholder="e.g., 'Explain how binary search works', 'Help me optimize this code', 'What's the time complexity of my solution?'"
+              disabled={isChatting}
+            />
+          </div>
+          
+          <button
+            onClick={handleChatPrompt}
+            disabled={isChatting || !chatPrompt.trim()}
+            className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            {isChatting ? (
+              <>
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Getting Response...
+              </>
+            ) : (
+              <>
+                <span>💬</span>
+                Send Message
+              </>
+            )}
+          </button>
+        </div>
+      </div>
 
       {/* Keyboard Shortcuts Help */}
       <div className="bg-gray-50 rounded-lg p-4">
