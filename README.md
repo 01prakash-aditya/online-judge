@@ -4,6 +4,10 @@
 
 ---
 
+![Home](proj_images/Screenshot 2025-05-28 092317.png)
+
+---
+
 ## Overview
 
 **AlgoU** enables:
