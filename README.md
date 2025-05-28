@@ -29,6 +29,39 @@
 
 ---
 
+## Architecture Overview
+AlgoU Online Judge follows the MVC (Model-View-Controller) architectural pattern to ensure clean separation of concerns and maintainable code structure.
+
+---
+
+## MVC Implementation
+**Model Layer (Database & Data Logic)**
+
+<u>User Model</u>: Handles user authentication, profiles, and submissions
+Problem Model: Manages coding problems, test cases, and metadata
+Discussion Model: Manages problem discussions, comments, and community interactions
+
+**Routes Layer (API Endpoints)**
+
+Auth Routes: User authentication and authorization endpoints
+User Routes: User profile management and statistics
+Community Routes: Discussion forums and community interactions
+Problem Routes: Problem CRUD operations and submissions
+
+**Controller Layer (Backend API Logic)**
+
+User Controller: Manages user profiles, statistics, and submissions
+Auth Controller: Handles login, registration, and JWT verification
+
+**View Layer (Frontend/React Components)**
+
+Problem List View: Displays available coding problems
+Code Editor View: Interactive code submission interface
+Profile View: User dashboard and submission history
+Leaderboard View: Real-time rankings and statistics
+
+---
+
 ## System Workflow
 
 1. **User submits code** through the platform
