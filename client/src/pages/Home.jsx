@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <div className='px-4 py-12 max-w-4xl mx-auto'>
       <h1 className='text-4xl font-bold mb-6 text-slate-800 text-center'>
-        Welcome to - AlgoU Online Judge
+        Welcome {currentUser?.fullName} - CodeKhana
       </h1>
       
       <div className='bg-blue-50 p-6 rounded-lg shadow-md mb-8'>
@@ -17,7 +17,7 @@ export default function Home() {
           Solve. Compile. Compete.
         </h2>
         <p className='mb-4 text-slate-700 text-lg'>
-          <b>AlgoU Online Judge</b> is a powerful online judge platform with an integrated compiler that allows 
+          <b>CodeKhana</b> is a powerful online judge platform with an integrated compiler that allows 
           you to practice coding problems, test your solutions instantly, and improve your 
           programming skills through competition and learning.
         </p>

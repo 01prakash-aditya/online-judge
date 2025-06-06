@@ -9,7 +9,7 @@ export default function Header() {
       <div className="flex justify-between items-center max-w-6xl mx-auto p-3">
         <Link to="/" className="flex items-center gap-2">
           <img src={logo} alt="Logo" className="h-8 w-8" />
-          <h1 className="font-bold text-lg">AlgoU Online Judge</h1>
+          <h1 className="font-bold text-lg">CodeKhana</h1>
         </Link>
         <ul className="flex gap-4">
           <li>

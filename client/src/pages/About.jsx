@@ -3,14 +3,14 @@ import React from 'react';
 export default function About() {
   return (
     <div className='px-4 py-12 max-w-4xl mx-auto'>
-      <h1 className='text-4xl font-bold mb-6 text-slate-800 text-center'>About - AlgoU Online Judge</h1>
+      <h1 className='text-4xl font-bold mb-6 text-slate-800 text-center'>About - CodeKhana</h1>
       
       <div className='bg-blue-50 p-6 rounded-lg shadow-md mb-8'>
         <h2 className='text-2xl font-semibold mb-3 text-blue-800'>
           Mission
         </h2>
         <p className='mb-4 text-slate-700 text-lg'>
-          <b>AlgoU Online Judge</b> was built to democratize coding practice and make competitive programming 
+          <b>CodeKhana</b> was built to democratize coding practice and make competitive programming 
           accessible to everyone. We believe that regular practice with instant feedback is the 
           key to mastering programming skills and acing technical interviews.
         </p>
@@ -96,7 +96,7 @@ export default function About() {
       <div className='text-center text-slate-700'>
         <p className='mb-4'>
           Whether you're preparing for technical interviews, competitive programming contests, or 
-          simply want to improve your problem-solving skills,<b> AlgoU Online Judge</b> is the platform for you.
+          simply want to improve your problem-solving skills,<b> CodeKhana</b> is the platform for you.
         </p>
         <p className='italic text-sm text-slate-500'>
           Developer : Aditya Prakash 
