@@ -271,32 +271,6 @@ export default function ContributePage() {
     fetchAllProblems();
   };
 
-  const handleDebugAuth = async () => {
-    try {
-      console.log('=== DEBUG AUTH INFO ===');
-      console.log('Current User:', currentUser);
-      console.log('User Role:', currentUser?.role);
-      console.log('User ID:', currentUser?.id);
-      console.log('Document Cookies:', document.cookie);
-      
-      // Test a simple authenticated request
-      const testRes = await fetch('/api/user/test', {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      console.log('Test auth response status:', testRes.status);
-      
-      if (testRes.ok) {
-        const testData = await testRes.json();
-        console.log('Test auth response:', testData);
-      }
-    } catch (error) {
-      console.error('Debug auth error:', error);
-    }
-  };
-
   if (!currentUser) {
     return (
       <div className="max-w-4xl mx-auto p-6 text-center">
@@ -309,18 +283,6 @@ export default function ContributePage() {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6 text-center">Contribute Problems</h1>
-
-      {/* Debug section for admins */}
-      {currentUser?.role === 'admin' && (
-        <div className="mb-4">
-          <button
-            onClick={handleDebugAuth}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
-          >
-            Debug Authentication
-          </button>
-        </div>
-      )}
 
       {/* Tab Navigation */}
       <div className="flex mb-6 border-b">
