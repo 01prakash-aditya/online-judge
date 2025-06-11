@@ -11,9 +11,10 @@ import { chatBot } from './chatBot.js';
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Updated CORS to allow network access
 app.use(cors({
-  origin: ['http://localhost:5173'],
-  methods: ['GET', 'POST'],
+  origin: ['http://localhost:5173', 'http://192.168.130.234:5173'], 
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -95,8 +96,7 @@ app.post("/chat-bot", async (req, res) => {
       error: error.message,
     });
   }
-}
-);
+});
 
 app.get('/', (req, res) => {
     res.json({
@@ -106,7 +106,10 @@ app.get('/', (req, res) => {
     });
 });
 
-app.listen(process.env.PORT || 8000, () => {
-  console.log('Server is running on port 8000');
+// Bind to all network interfaces (0.0.0.0)
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on http://0.0.0.0:${PORT}`);
+  console.log(`Network access: http://192.168.130.234:${PORT}`);
   console.log('Supported languages: C++, Python 3, Java');
 });
