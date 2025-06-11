@@ -186,89 +186,89 @@ export default function ProblemSet() {
         </div>
       </div>
       
-      {/* Problems Table with Horizontal Scroll */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        {/* Mobile scroll hint */}
-        <div className="sm:hidden bg-gray-50 px-4 py-2 text-xs text-gray-600 border-b">
-          ← Swipe left to see more columns
-        </div>
-        
-        {/* Scrollable table container */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200" style={{ minWidth: '700px' }}>
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">#</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Difficulty</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Rating</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Action</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProblems.map((problem, index) => (
-                <tr 
-                  key={problem._id} 
-                  className={`hover:bg-gray-50 ${isProblemSolved(problem._id) ? 'bg-green-50' : ''}`}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    <div className="flex items-center gap-2">
-                      {index + 1}
-                      {isProblemSolved(problem._id) && (
-                        <span className="text-green-600 text-lg">✓</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500" style={{ minWidth: '300px' }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="font-medium text-gray-900">{problem.title}</div>
-                      {isProblemSolved(problem._id) && (
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium whitespace-nowrap">
-                          Solved
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {problem.tags.map((tag, tagIndex) => (
-                        <span key={tagIndex} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getDifficultyColor(problem.difficulty)} whitespace-nowrap`}>
-                      {problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.rating}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => handleProblemClick(problem)}
-                      className={`px-3 py-1 rounded-md whitespace-nowrap ${
-                        isProblemSolved(problem._id)
-                          ? 'text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100'
-                          : 'text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100'
-                      }`}
-                    >
-                      {isProblemSolved(problem._id) ? 'Review' : 'Solve'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      {filteredProblems.length === 0 && !loading && (
-        <div className="text-center p-8 text-gray-500">
-          {problems.length === 0 
-            ? "No problems available yet. Check back later!" 
-            : "No problems match your filters. Try adjusting your search criteria."
-          }
-        </div>
-      )}
+      {/* Problems Table with Responsive Width */}
+<div className="bg-white rounded-lg shadow overflow-hidden">
+  {/* Mobile scroll hint */}
+  <div className="sm:hidden bg-gray-50 px-4 py-2 text-xs text-gray-600 border-b">
+    ← Swipe left to see more columns
+  </div>
+  
+  {/* Scrollable table container - only scroll on mobile/tablet */}
+  <div className="overflow-x-auto lg:overflow-x-visible">
+    <table className="w-full divide-y divide-gray-200 lg:min-w-0" style={{ minWidth: '700px' }}>
+      <thead className="bg-gray-50">
+        <tr>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap w-16">#</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap lg:w-auto">Title</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap w-24">Difficulty</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap w-20">Rating</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap w-24">Action</th>
+        </tr>
+      </thead>
+      <tbody className="bg-white divide-y divide-gray-200">
+        {filteredProblems.map((problem, index) => (
+          <tr 
+            key={problem._id} 
+            className={`hover:bg-gray-50 ${isProblemSolved(problem._id) ? 'bg-green-50' : ''}`}
+          >
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-16">
+              <div className="flex items-center gap-2">
+                {index + 1}
+                {isProblemSolved(problem._id) && (
+                  <span className="text-green-600 text-lg">✓</span>
+                )}
+              </div>
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-500 lg:w-auto" style={{ minWidth: '300px' }}>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="font-medium text-gray-900">{problem.title}</div>
+                {isProblemSolved(problem._id) && (
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium whitespace-nowrap">
+                    Solved
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {problem.tags.map((tag, tagIndex) => (
+                  <span key={tagIndex} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm w-24">
+              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getDifficultyColor(problem.difficulty)} whitespace-nowrap`}>
+                {problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}
+              </span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 w-20">{problem.rating}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium w-24">
+              <button
+                onClick={() => handleProblemClick(problem)}
+                className={`px-3 py-1 rounded-md whitespace-nowrap ${
+                  isProblemSolved(problem._id)
+                    ? 'text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100'
+                    : 'text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100'
+                }`}
+              >
+                {isProblemSolved(problem._id) ? 'Review' : 'Solve'}
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{filteredProblems.length === 0 && !loading && (
+  <div className="text-center p-8 text-gray-500">
+    {problems.length === 0 
+      ? "No problems available yet. Check back later!" 
+      : "No problems match your filters. Try adjusting your search criteria."
+    }
+  </div>
+)}
       
       {/* Featured Problem Section */}
       {filteredProblems.length > 0 && (
