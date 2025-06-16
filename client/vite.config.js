@@ -4,16 +4,14 @@ import tailwindcss from '@tailwindcss/vite'
 
 const isDocker = process.env.IS_DOCKER === 'true'
 
-// For network access, we need to handle different scenarios
+// API target with environment variable support
 const getApiTarget = () => {
   if (isDocker) {
     return 'http://api:3000'
   }
   
-  // For development - you might need to adjust this based on your setup
-  // If running on network, use the actual IP instead of localhost
-  const isDev = process.env.NODE_ENV === 'development'
-  return isDev ? 'http://localhost:3000' : 'http://192.168.130.234:3000'
+  // Use environment variable or default to localhost
+  return process.env.VITE_API_URL || 'http://localhost:3000'
 }
 
 const apiTarget = getApiTarget()
@@ -24,14 +22,29 @@ export default defineConfig({
     include: ['@reduxjs/toolkit'],
   },
   server: {
-    host: '0.0.0.0', // Explicitly set to allow external connections
+    host: '0.0.0.0',
     port: 5173,
     proxy: {
       '/api': {
         target: apiTarget,
         changeOrigin: true,
         secure: false,
-        timeout: 30000, // Add timeout
+        timeout: 30000,
+        // Ensure cookies are forwarded properly
+        cookieDomainRewrite: {
+          '*': 'localhost'
+        },
+        // Handle headers properly
+        onProxyReq: (proxyReq, req, res) => {
+          // Forward cookies
+          if (req.headers.cookie) {
+            proxyReq.setHeader('cookie', req.headers.cookie);
+          }
+          // Forward authorization header
+          if (req.headers.authorization) {
+            proxyReq.setHeader('authorization', req.headers.authorization);
+          }
+        },
         configure: (proxy, options) => {
           proxy.on('error', (err, req, res) => {
             console.log('❌ Proxy error:', err.message);
@@ -40,6 +53,10 @@ export default defineConfig({
           });
           proxy.on('proxyReq', (proxyReq, req, res) => {
             console.log('📤 Proxying request:', req.method, req.url, '→', apiTarget);
+            console.log('   Headers:', {
+              cookie: req.headers.cookie ? 'Present' : 'None',
+              authorization: req.headers.authorization ? 'Present' : 'None'
+            });
           });
           proxy.on('proxyRes', (proxyRes, req, res) => {
             console.log('📥 Proxy response:', proxyRes.statusCode, req.url);
@@ -49,16 +66,3 @@ export default defineConfig({
     },
   },
 })
-
-// Alternative: No proxy version (direct API calls)
-// export default defineConfig({
-//   plugins: [react(), tailwindcss()],
-//   optimizeDeps: {
-//     include: ['@reduxjs/toolkit'],
-//   },
-//   server: {
-//     host: '0.0.0.0',
-//     port: 5173,
-//     // Remove proxy - handle API calls directly in frontend
-//   },
-// })

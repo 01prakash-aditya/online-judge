@@ -18,8 +18,10 @@ mongoose.connect(process.env.MONGO).then(() => {
  
 const app = express();
 
+app.set('trust proxy', 1); 
+
 app.use(cors({
-    origin: 'http://localhost:5173', 
+    origin: true, 
     credentials: true, 
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']

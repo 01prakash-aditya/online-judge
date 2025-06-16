@@ -1,4 +1,4 @@
-FROM node:18
+FROM --platform=linux/amd64 node:24
 
 WORKDIR /app
 
@@ -10,5 +10,7 @@ COPY . .
 EXPOSE 5173
 
 ENV IS_DOCKER=true
+
+ENV NODE_ENV=production
 
 CMD ["npm", "run", "dev"]
