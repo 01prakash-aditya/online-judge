@@ -4,7 +4,7 @@
 
 ---
 
-![Home](https://github.com/01prakash-aditya/online-judge/blob/e88b29a8e858b5856ab65424a2c79794997ad7e7/proj_images/Screenshot%202025-05-28%20092317.png)
+![Home](https://github.com/01prakash-aditya/online-judge/blob/8512fe449857be0f76c9c232e8b499d3e1645665/proj_images/Screenshot%202025-06-23%20073046.png)
 
 ---
 
@@ -259,31 +259,29 @@ CI/CD Pipeline: Automated testing and deployment workflows
 
 ---
 
-## Project Images 
-
 **Online Compiler**
-![Compiler](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092345.png)
+![Compiler](https://github.com/01prakash-aditya/online-judge/blob/8512fe449857be0f76c9c232e8b499d3e1645665/proj_images/Screenshot%202025-06-23%20073030.png)
 
 **AI Chat Assistant**
-![ChatBot](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092357.png)
+![ChatBot](https://github.com/01prakash-aditya/online-judge/blob/8512fe449857be0f76c9c232e8b499d3e1645665/proj_images/Screenshot%202025-06-23%20073021.png)
 
 **Problem Set**
-![ProblemSet](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092418.png)
+![ProblemSet](https://github.com/01prakash-aditya/online-judge/blob/8512fe449857be0f76c9c232e8b499d3e1645665/proj_images/Screenshot%202025-06-23%20073003.png)
 
 **LeaderBoard**
-![Leaderboard](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092433.png)
+![Leaderboard](https://github.com/01prakash-aditya/online-judge/blob/8512fe449857be0f76c9c232e8b499d3e1645665/proj_images/Screenshot%202025-06-23%20072948.png)
 
 **Discussions**
-![Discussions](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092443.png)
+![Discussions](https://github.com/01prakash-aditya/online-judge/blob/8512fe449857be0f76c9c232e8b499d3e1645665/proj_images/Screenshot%202025-06-23%20072937.png)
 
 **Contribute Page**
-![Contribute](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092455.png)
+![Contribute](https://github.com/01prakash-aditya/online-judge/blob/8512fe449857be0f76c9c232e8b499d3e1645665/proj_images/Screenshot%202025-06-23%20072919.png)
 
 **Profile Page**
-![Profile](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20092504.png)
+![Profile](https://github.com/01prakash-aditya/online-judge/blob/8512fe449857be0f76c9c232e8b499d3e1645665/proj_images/Screenshot%202025-06-23%20072824.png)
 
 **SignUp Page**
-![SignUp](https://github.com/01prakash-aditya/online-judge/blob/4d5c1ad93d4724c686fa889b37fd93a476a6d41d/proj_images/Screenshot%202025-05-28%20093024.png)
+![SignUp](https://github.com/01prakash-aditya/online-judge/blob/8512fe449857be0f76c9c232e8b499d3e1645665/proj_images/Screenshot%202025-06-23%20072848.png)
 
 ---
 
