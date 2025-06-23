@@ -1,6 +1,6 @@
-# AlgoU Online Judge
+# CodeKhana Online Judge
 
-**AlgoU** is an **Online Judge platform** built with the **MERN stack** (MongoDB, Express.js, React.js, Node.js). It supports coding problems with automatic code evaluation, problem management, AI review and leaderboard functionality.
+**CodeKhana** is an **Online Judge platform** built with the **MERN stack** (MongoDB, Express.js, React.js, Node.js). It supports coding problems with automatic code evaluation, problem management, AI review and leaderboard functionality.
 
 ---
 
@@ -10,7 +10,7 @@
 
 ## Overview
 
-**AlgoU** enables:
+**CodeKhana** enables:
 
 - **User Registration and Login** with JWT-based authentication
 - **Problem Listing** with filtering options
@@ -30,7 +30,7 @@
 ---
 
 ## Architecture Overview  
-AlgoU Online Judge follows the MVC (Model-View-Controller) architectural pattern to ensure clean separation of concerns and maintainable code structure.  
+CodeKhana Online Judge follows the MVC (Model-View-Controller) architectural pattern to ensure clean separation of concerns and maintainable code structure.  
   
 ![MVC](https://github.com/01prakash-aditya/online-judge/blob/7423f06cbc75a0ad3cda7ca53b27bbf452c18a1d/proj_images/Screenshot%202025-05-28%20152116.png)
 
